@@ -34,7 +34,7 @@ int main(){
 					if(p2ex <0)custom_perror("exec failed");
 				}
 			}
-			waitpid(pid, &status, 0); /* wait fisrt child */
+			waitpid(pid, &status, 0); /* wait fisrt child to end*/
 		}
 		else custom_perror("fork failed:");
 	}
