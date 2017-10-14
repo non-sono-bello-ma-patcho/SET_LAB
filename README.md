@@ -1,5 +1,5 @@
 # Another crappy repository!
-This repository contains all my project for the *Trasmission and Processing System* class I'm currently following!
+This repository contains all my project for the *Trasmission and Processing System* class I'm currently attending!
 
 ## Project's list:
 1. fork and exec:
