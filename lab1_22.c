@@ -14,23 +14,26 @@ void custom_perror(char* line){
 int main(){
 	char prefix[]="/bin/";
 	char prefix2[]="/usr/bin/";
-	char option[123], command[128];
+	char command[123], path[128];
 	int pid, p1ex, p2ex, status;
 
 	for(;;){
 		printf("nano-bash $ ");
-		if(fgets(option, 123, stdin)==NULL || strcmp("exit\n", option)==0) exit(EXIT_SUCCESS);
-		option[strlen(option)-1]='\0'; /* delete \n char */
-		memcpy(command, prefix, sizeof(prefix));
-		strcat(command, option);
+		if(fgets(command, 123, stdin)==NULL || strcmp("exit\n", command)==0) exit(EXIT_SUCCESS);
+		if(command[strlen(command)-1]=='\n')command[strlen(command)-1]='\0'; /* delete \n char */
+		
+		memcpy(path, prefix, sizeof(prefix)); /* command = /bin/ */
+		strcat(path, command); /* command = /bin/<command passed by user> */
+		
 		pid = fork();
 		if(pid>=0){
 			if(pid==0){
-				p1ex = execl(command, command, NULL);
+				p1ex = execl(path, path, NULL);
 				if(p1ex<0){
-					memcpy(command, prefix2, sizeof(prefix2));
-					strcat(command, option);
-					p2ex = execl(command, command, NULL);
+					/* if command is not found in /bin/, search in/usr/bin/: */
+					memcpy(path, prefix2, sizeof(prefix2)); /* command = /usr/bin/ */
+					strcat(path, command); /* command = /usr/bin/<command passed by user> */
+					p2ex = execl(path, path, NULL);
 					if(p2ex <0)custom_perror("exec failed");
 				}
 			}
