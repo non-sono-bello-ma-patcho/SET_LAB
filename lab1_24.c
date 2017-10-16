@@ -13,18 +13,17 @@ void custom_perror(char* line){
 }
 
 int main(int argc, char* argv[]){
-	int pid, pipefd[2], status, execres; /* create a new process */
+	int pid, pipefd[2], status, execres;
 	char command1[] = "/bin/ps";
 	char command2[]="/bin/grep";
 
-	/* create tunnel with pipe */
 	if(pipe(pipefd)<0) custom_perror("pipe failed:");
 
 	pid = fork();
 	if(pid<0) custom_perror("fork failed");
 	if(pid==0){
 		/* child process */
-		dup2(pipefd[0], 0); /* now p[0] contains 0 */
+		dup2(pipefd[0], 0); /* redirect stdin to read end*/
 		close(pipefd[0]);
 		/* execute the ps command */
 		execres=execl(command2, command2, "bash", NULL);
@@ -32,7 +31,7 @@ int main(int argc, char* argv[]){
 	}
 	else{
 		/* parent process */
-		dup2(pipefd[1], 1); /* now contains 1 */
+		dup2(pipefd[1], 1); /* redirect stdout to write end*/
 		close(pipefd[1]);
 		execres=execl(command1, command1, "aux", NULL);
 		if(execres<0) custom_perror("execl failed");		
