@@ -17,17 +17,13 @@ int main(int argc, char* argv[]){
 	char command[] = "/bin/ls";
 	char option[]="-l";
 	if(pid<0) custom_perror("fork failed");
-	else if(pid>=0){
-		if(pid==0){
-			nfd=open(argv[1], O_CREAT | O_RDWR);
-			dup2(nfd, 1);
-			execres=execl(command, command, option, NULL);
-			if(execres<0) custom_perror("execl failed");
-		}
-		waitpid(pid, &status, 0);
+	if(pid==0){
+		nfd=open(argv[1], O_CREAT | O_RDWR);
+		dup2(nfd, 1);
 		close(nfd);
+		execres=execl(command, command, option, NULL);
+		if(execres<0) custom_perror("execl failed");
 	}
-	else custom_perror("exec failed");
-
+	waitpid(pid, &status, 0);
 	return 42;
 }
