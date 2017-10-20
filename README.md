@@ -13,7 +13,7 @@ This repository contains all my project for the *Trasmission and Processing Syst
 
 ### 2. ping-pong:
 This project is a bit more complicated, it consist of a tcp client, a udp client and a server [pong]();
-- [tcp_ping](): (usage `server_address server port size ripetition`)
+- [tcp_ping](pingpong/tcp_ping.c): (usage `server_address server port size ripetition`)
    implement a tcp client that 
    - uses [getaddrinfo(3)](http://man7.org/linux/man-pages/man3/getaddrinfo.3.html) to obtain server's address in binary form;
    - uses [socket(2)](http://man7.org/linux/man-pages/man2/socket.2.html) to create a socket; 
