@@ -31,4 +31,4 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
 - [auxiliar libraries](pingpong/pingpong_lib);
 
 
-\* *actually accept() create a new socket on server, connect with client, while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
+\* *actually accept() create a new socket on server (connected with client) while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
