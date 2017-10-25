@@ -1,6 +1,6 @@
 # Another crappy repository!
 This repository contains all our project for the *Trasmission and Processing System* class I'm currently attending!
-##### **NB**: ~~strikethrough~~ source code are not impllmented yet;
+##### **NB**: ~~strikethrough~~ source code are not implemented yet;
 
 ## Project's list:
 ### 1. fork and exec:
