@@ -50,10 +50,9 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** Send the message through the socket ***/
 /*** TO BE DONE START ***/
-	for (offset = 0; (offset + (sent_bytes = send(tcp_socket, message + offset, msg_size-offset,0))) < msg_size; offset += sent_bytes) {
-		if (sent_bytes < 0)
+	sent_bytes = send(tcp_socket, message + offset, msg_size,0);
+		if (sent_bytes != msg_size)
 			fail_errno("Error receiving data");
-	}
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/
