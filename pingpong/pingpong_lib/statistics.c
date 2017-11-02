@@ -93,7 +93,10 @@ void print_statistics(FILE * outf, const char *name, int repeats,
 	fprintf(outf, "RTT histogram:\n");
 
 /*** TO BE DONE START ***/
-	for (j = 0; j < N_HISTOGRAM_ITEMS; j++)	printf("%lg %i\n", rtt[j], histogram[j]);
+	double range = h_min;
+	for(j=0; j<N_HISTOGRAM_ITEMS; j++, range+=h_incr) fprintf(outf, "%lg %d\n", range, histogram[j]);
+	if (rtt[median] > 0.0)
+		fprintf(outf, "   median Throughput : %lg KB/s", 2.0 *(double)(msg_sz)/rtt[median]);
 /*** TO BE DONE END ***/
 
 	if (mean > 0.0)
