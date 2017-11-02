@@ -38,7 +38,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
-	spintf(message, "%d\n", msg_no);
+	sprintf(message, "%d\n", msg_no);
 /*** TO BE DONE END ***/
 
 	do {
