@@ -38,24 +38,45 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
+	spintf(message, "%d\n", msg_no);
 /*** TO BE DONE END ***/
 
 	do {
 		debug(" ... sending message %d\n", msg_no);
 	/*** Store the current time in send_time ***/
 /*** TO BE DONE START ***/
+			int gt_status = clock_gettime(CLOCK_REALTIME, &send_time);
+			if(gt_status!=0){
+				fprintf(stderr, "clock_gettime:%s\n", strerror(gt_status));
+				exit(EXIT_FAILURE);
+			}
 /*** TO BE DONE END ***/
 
 	/*** Send the message through the socket ***/
 /*** TO BE DONE START ***/
+		sent_bytes = send(ping_socket, message, msg_size, 0);
+		if(sent_bytes!=mesg_size){
+			fprintf(stderr, "clock_gettime:%s\n", strerror(sent_bytes));
+			exit(EXIT_FAILURE);
+		}
 /*** TO BE DONE END ***/
 
 	/*** Receive answer through the socket (non blocking mode) ***/
 /*** TO BE DONE START ***/
+		for (offset = 0; (offset + (recv_bytes = recv(tcp_socket, rec_buffer + offset, sent_bytes - offset, MSG_WAITALL))) < msg_size; offset += recv_bytes) {
+			debug(" ... received %zd bytes back\n", recv_bytes);
+			if (recv_bytes < 0)
+				fail_errno("Error receiving data");
+		}
 /*** TO BE DONE END ***/
 
 	/*** Store the current time in recv_time ***/
 /*** TO BE DONE START ***/
+		gt_status = clock_gettime(CLOCK_REALTIME, &recv_time);
+			if(gt_status!=0){
+				fprintf(stderr, "clock_gettime:%s\n", strerror(gt_status));
+				exit(EXIT_FAILURE);
+			}
 /*** TO BE DONE END ***/
 
 		roundtrip_time_ms = timespec_delta2milliseconds(&recv_time, &send_time);
@@ -94,16 +115,25 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
     /*** Specify the UDP sockets' options ***/
 	memset(&gai_hints, 0, sizeof gai_hints);
 /*** TO BE DONE START ***/
+		gai_hints.ai_family = AF_INET;
+		gai_hints.ai_socktype = SOCK_DGRAM;
+		gai_hints.ai_protocol = 17;
 /*** TO BE DONE END ***/
 
 	if ((ping_socket = socket(gai_hints.ai_family, gai_hints.ai_socktype, gai_hints.ai_protocol)) == -1)
 		fail_errno("UDP Ping could not get socket");
     /*** change socket behavior to NONBLOCKING ***/
 /*** TO BE DONE START ***/
+	int fcntlstatus = fcntl(ping_socket, F_SETFD, O_NONBLOCK);
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
+	gai_rv = getaddrinfo(pong_addr, pong_port, gai_hints, pong_addrinfo);
+	if(gai_rv<0){
+		fprintf(stderr, "getaddrinfo: %s\n", strerror(gai_rv));
+		exit(EXIT_FAILURE);
+	}
 /*** TO BE DONE END ***/
 
 #ifdef DEBUG
@@ -120,6 +150,10 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
     /*** connect the ping_socket UDP socket with the server ***/
 /*** TO BE DONE START ***/
+	if(connect(ping_socket, (((struct sockaddr_in *)(pong_addrinfo-> ai_addr))->sin_addr))<0){
+		fprintf(stderr, "connect: %s\n", strerror(status));
+		exit(EXIT_FAILURE);
+	}
 /*** TO BE DONE END ***/
 
 	freeaddrinfo(pong_addrinfo);
@@ -153,10 +187,12 @@ int main(int argc, char *argv[])
     /*** Specify TCP socket options ***/
 	memset(&gai_hints, 0, sizeof gai_hints);
 /*** TO BE DONE START ***/
+	
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
+	
 /*** TO BE DONE END ***/
 
     /*** Print address of the Pong server before trying to connect ***/
