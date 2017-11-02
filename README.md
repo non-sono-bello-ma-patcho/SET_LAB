@@ -22,7 +22,7 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
    - send and receive back data from server with the [send(2)](http://man7.org/linux/man-pages/man2/send.2.html) and [recv(2)](http://man7.org/linustrikex/man-pages/man2/recv.2.html) system call;
 - [udp_ping](pingpong/udp_ping/udp_ping.c)**([wip](https://github.com/non-sono-bello-ma-patcho/SET_LAB/pull/2))**: (usage `udp_ping server_address server_port size ripetition`)
    - implement a udp client similarly to tcp client;
-- [server_pong](pingpong/pongserver/pongserver.c): (usage `serverpong PORT`)
+- [server_pong](pingpong/pong_server/pong_server.c): (usage `serverpong PORT`)
    - create a new socket with [socket(2)](http://man7.org/linux/man-pages/man2/socket.2.html);
    - associate socket to a port using [bind(2)](http://man7.org/linux/man-pages/man2/bind.2.html);
    - notify the OS the availability to listen to request using [listen(2)](http://man7.org/linux/man-pages/man2/listen.2.html);
