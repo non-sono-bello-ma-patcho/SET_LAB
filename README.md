@@ -30,7 +30,7 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
    - send and receive data using auxiliar socket opened by accept();
    - close auxiliary socket with [shutdwon(2)](http://man7.org/linux/man-pages/man2/shutdown.2.html) and [close(2)](http://man7.org/linux/man-pages/man2/close.2.html);
 - [auxiliar libraries](pingpong/pingpong_lib);
-- [shell scrips](pingpong/scripts):
+- [shell scripts](pingpong/scripts):
    - [mkfile.bash](pingpong/scripts/mkfile.bash)(usage`mkfile.bash <min dimension> <max dimension for udp message> <max dimension for tcp message> <ripetitions>`) generates throughtput diagrams basing on message dimension for both udp and tcp client;
 
 \* *actually accept() create a new socket on server (connected with client) while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
