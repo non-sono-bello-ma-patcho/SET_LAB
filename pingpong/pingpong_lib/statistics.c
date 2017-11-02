@@ -94,6 +94,8 @@ void print_statistics(FILE * outf, const char *name, int repeats,
 
 /*** TO BE DONE START ***/
 	for (j = 0; j < N_HISTOGRAM_ITEMS; j++)	printf("%lg %i\n", rtt[j], histogram[j]);
+	if (mean > 0.0)
+		fprintf(outf, "   median Throughput : %lg KB/s", 2.0 *(double)(msg_sz)/rtt[median]);
 /*** TO BE DONE END ***/
 
 	if (mean > 0.0)
