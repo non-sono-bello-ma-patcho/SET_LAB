@@ -191,7 +191,6 @@ int main(int argc, char *argv[])
 /*** TO BE DONE START ***/
 	gai_hints.ai_family = AF_INET;
 	gai_hints.ai_socktype = SOCK_STREAM;
-	gai_hints.ai_flags = AI_PASSIVE;
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
@@ -241,8 +240,8 @@ int main(int argc, char *argv[])
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
-	printf("answer: %s\n", answer);
-	if(strcmp(answer, "OK\n")!=0){
+	printf("answer: %s", answer);
+	if(strncmp(answer, "OK ", 3)!=0){
 	 fprintf(stderr, "No answer from Pong :-(\n");
 	 exit(EXIT_FAILURE);
 	}

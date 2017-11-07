@@ -50,9 +50,9 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** Send the message through the socket ***/
 /*** TO BE DONE START ***/
-	sent_bytes = send(tcp_socket, message + offset, msg_size,0);
+	sent_bytes = send(tcp_socket, message, msg_size,0);
 		if (sent_bytes != msg_size)
-			fail_errno("Error receiving data");
+			fail_errno("Error sending data");
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/
@@ -155,6 +155,7 @@ int main(int argc, char **argv){
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
+	fprintf(stderr, "answer: %s\n", answer);
 	if(strcmp(answer, "OK\n")!=0)	fail_errno("No answer from Pong :-(");
 /*** TO BE DONE END ***/
 
