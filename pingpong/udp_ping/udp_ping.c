@@ -55,7 +55,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 	/*** Send the message through the socket ***/
 /*** TO BE DONE START ***/
 		sent_bytes = send(ping_socket, message, msg_size, 0);
-		if(sent_bytes!=mesg_size){
+		if(sent_bytes!=msg_size){
 			fprintf(stderr, "clock_gettime:%s\n", strerror(sent_bytes));
 			exit(EXIT_FAILURE);
 		}
@@ -63,7 +63,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int ping_soc
 
 	/*** Receive answer through the socket (non blocking mode) ***/
 /*** TO BE DONE START ***/
-		for (offset = 0; (offset + (recv_bytes = recv(tcp_socket, rec_buffer + offset, sent_bytes - offset, MSG_WAITALL))) < msg_size; offset += recv_bytes) {
+		for (int offset = 0; (offset + (recv_bytes = recv(ping_socket, answer_buffer + offset, sent_bytes - offset, MSG_WAITALL))) < msg_size; offset += recv_bytes) {
 			debug(" ... received %zd bytes back\n", recv_bytes);
 			if (recv_bytes < 0)
 				fail_errno("Error receiving data");
@@ -129,7 +129,7 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
-	gai_rv = getaddrinfo(pong_addr, pong_port, gai_hints, pong_addrinfo);
+	gai_rv = getaddrinfo(pong_addr, pong_port, &gai_hints, &pong_addrinfo);
 	if(gai_rv<0){
 		fprintf(stderr, "getaddrinfo: %s\n", strerror(gai_rv));
 		exit(EXIT_FAILURE);
@@ -150,8 +150,10 @@ int prepare_udp_socket(char *pong_addr, char *pong_port)
 
     /*** connect the ping_socket UDP socket with the server ***/
 /*** TO BE DONE START ***/
-	if(connect(ping_socket, (((struct sockaddr_in *)(pong_addrinfo-> ai_addr))->sin_addr))<0){
-		fprintf(stderr, "connect: %s\n", strerror(status));
+	struct sockaddr_in *ipv4;
+	ipv4 = (struct sockaddr_in *)pong_addrinfo->ai_addr;
+	if(connect(ping_socket,  (struct sockaddr *) ipv4, sizeof(*ipv4))<0){
+		fprintf(stderr, "connect: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 /*** TO BE DONE END ***/
@@ -187,12 +189,18 @@ int main(int argc, char *argv[])
     /*** Specify TCP socket options ***/
 	memset(&gai_hints, 0, sizeof gai_hints);
 /*** TO BE DONE START ***/
-	
+	gai_hints.ai_family = AF_INET;
+	gai_hints.ai_socktype = SOCK_STREAM;
+	gai_hints.ai_flags = AI_PASSIVE;
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
-	
+	int status = getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
+	if(status!=0){
+		fprintf(stderr, "addrinfo:%s\n", gai_strerror(status));
+		exit(EXIT_FAILURE);
+	}	
 /*** TO BE DONE END ***/
 
     /*** Print address of the Pong server before trying to connect ***/
@@ -201,6 +209,15 @@ int main(int argc, char *argv[])
 
     /*** create a new TCP socket and connect it with the server ***/
 /*** TO BE DONE START ***/
+	ask_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if(ask_socket<0){
+		perror("socket");
+		exit(EXIT_FAILURE);
+	}
+	if(connect(ask_socket, (struct sockaddr *) ipv4, sizeof(*ipv4))<0){ /* sizeof(*ipv4) mannaggia la miseria */
+		fprintf(stderr, "connect:%s\n", strerror(errno));
+		exit(EXIT_FAILURE);		
+	}
 /*** TO BE DONE END ***/
 
 	freeaddrinfo(server_addrinfo);
@@ -209,6 +226,10 @@ int main(int argc, char *argv[])
 
     /*** Write the request on the TCP socket ***/
 /** TO BE DONE START ***/
+	if(write(ask_socket, request, strlen(request))<0){
+		perror("write");
+		exit(EXIT_FAILURE);
+	}	
 /*** TO BE DONE END ***/
 
 	nr = read(ask_socket, answer, sizeof(answer));
@@ -220,6 +241,11 @@ int main(int argc, char *argv[])
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
+	printf("answer: %s\n", answer);
+	if(strcmp(answer, "OK\n")!=0){
+	 fprintf(stderr, "No answer from Pong :-(\n");
+	 exit(EXIT_FAILURE);
+	}
 /*** TO BE DONE END ***/
 
     /*** else ***/
