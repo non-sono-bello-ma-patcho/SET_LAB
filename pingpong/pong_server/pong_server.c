@@ -117,7 +117,21 @@ int open_udp_socket(int *pong_port)
 		char port_number_as_str[6];
 		sprintf(port_number_as_str, "%d", port_number);
 /*** TO BE DONE START ***/
-		
+	gai_rv = getaddrinfo(NULL, port_number_as_str, &gai_hints, &pong_addrinfo);
+	if(gai_rv<0){
+		fprintf(stderr, "getaddrinfo: %s", gai_strerror(gai_rv));
+		exit(EXIT_FAILURE);
+	}
+	udp_socket = socket(AF_INET, SOCK_DGRAM, 0);
+	if(udp_socket<0){
+		fprintf(stderr, "socket: %s", strerror(udp_socket));
+		exit(EXIT_FAILURE);		
+	}
+	struct sockaddr_in *ipv4 = (struct sockaddr_in *)pong_addrinfo->ai_addr;
+	if(bind(udp_socket, (struct sockaddr *) ipv4, sizeof(*ipv4))<0){
+		fprintf(stderr, "bind%s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 /*** TO BE DONE END ***/
 		if (errno != EADDRINUSE) 
 			fail_errno("UDP Pong could not bind the socket");
@@ -155,8 +169,7 @@ void serve_pong_tcp(int pong_fd, FILE *request_stream, size_t message_size, int 
 		fail_errno("Pong Server TCP cannot shutdown socket");
 }
 
-void serve_client(int request_socket, struct sockaddr_in *client_addr)
-{
+void serve_client(int request_socket, struct sockaddr_in *client_addr){
 	FILE *request_stream = fdopen(request_socket, "r");
 	char *request_str = NULL, *strtokr_save;
 	char *protocol_str, *size_str, *number_str;
@@ -262,6 +275,16 @@ int main(int argc, char **argv)
 	gai_hints.ai_protocol = IPPROTO_TCP;
 
 /*** TO BE DONE START ***/
+	gai_rv = getaddrinfo(NULL, argv[1], &gai_hints, &server_addrinfo);
+	if(gai_rv<0){
+		fprintf(stderr, "getaddrinfo %s\n", gai_strerror(gai_rv));
+		exit(EXIT_FAILURE);
+	}
+	server_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if(bind(server_socket, (struct sockaddr *)server_addrinfo->ai_addr, sizeof(*(struct sockaddr_in *)server_addrinfo->ai_addr))<0){
+		fprintf(stderr, "bind %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 /*** TO BE DONE END ***/
 
 	freeaddrinfo(server_addrinfo);
@@ -274,4 +297,3 @@ int main(int argc, char **argv)
 		fail_errno("Pong server cannot register SIGCHLD handler");
 	server_loop(server_socket);
 }
-
