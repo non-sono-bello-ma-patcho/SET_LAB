@@ -117,6 +117,7 @@ int open_udp_socket(int *pong_port)
 		char port_number_as_str[6];
 		sprintf(port_number_as_str, "%d", port_number);
 /*** TO BE DONE START ***/
+		
 /*** TO BE DONE END ***/
 		if (errno != EADDRINUSE) 
 			fail_errno("UDP Pong could not bind the socket");

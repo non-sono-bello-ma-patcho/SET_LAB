@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
-	printf("answer: %s", answer);
 	if(strncmp(answer, "OK ", 3)!=0){
 	 fprintf(stderr, "No answer from Pong :-(\n");
 	 exit(EXIT_FAILURE);
