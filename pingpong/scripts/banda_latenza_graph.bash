@@ -15,9 +15,9 @@ declare -a Denominatore
 
 for ProtocolName in "${arr[@]}"
 do
-    readonly InputFile="${DataDir}/${ProtocolName}_throughput.dat"
-    readonly OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
-    readonly OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
+    declare InputFile="${DataDir}/${ProtocolName}_throughput.dat"
+    declare OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
+    declare OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
     N1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
@@ -35,7 +35,7 @@ do
     B=$(bc <<< "scale=20;var1=${N2}-${N1};var1/${Denominatore}")
 
     echo $B
-
+    echo $L
     #stampa i valori Numero_byte e Latenza sul file .dat
     echo 'stampo i valori Numero_byte e Latenza sul file .dat'
     N_LINEE_FILE=$(wc -l "${DataDir}/${ProtocolName}_throughput.dat" | cut -d ' ' -f1)
@@ -46,8 +46,9 @@ do
     while [ $NUMERO_LINEA -lt $N_LINEE_FILE ]
     do 
         N=$(sed "${NUMERO_LINEA}q;d" ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
-        D=$(bc <<<"scale=20;var1=${L};var2=${N};var=${B};var1 + var2 / var3")
+        D=$(bc <<<"scale=20;var1=${L};var2=${N};var3=${B};var1 + var2 / var3")
         printf "$N $D \n" >> ${OutputDatFile}
+        ((NUMERO_LINEA++))
     done
 
 gnuplot <<-eNDgNUPLOTcOMMAND
