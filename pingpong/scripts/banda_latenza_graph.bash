@@ -11,7 +11,7 @@ for ProtocolName in "${arr[@]}"
 do
     InputFile="${DataDir}/${ProtocolName}_throughput.dat"
     OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
-    OutTmpFile="${DataDir}/${ProtocolName}_delay_tmp.dat"
+    OutTmpFile="${InputFile}_tmp.dat"
     OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
     
     if [ -e ${OutputDatFile} ]
@@ -22,10 +22,11 @@ do
     fi
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
-    N1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1 )
-    T1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f3 )
-    N2=$(tail -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1 )
-    T2=$(tail -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f3 )
+    sort -n --key=3 -t' .' ${InputFile} > $OutTmpFile
+    N1=$(head -n 1 ${InputFile}| cut -d' ' -f1 )
+    T1=$(head -n 1 ${InputFile}| cut -d' ' -f3 )
+    N2=$(tail -n 1 ${OutTmpFile}| cut -d' ' -f1 )
+    T2=$(tail -n 1 ${OutTmpFile}| cut -d' ' -f3 )
     echo "N1 T1 N2 T2:"
     echo ${N1}
     echo ${T1}
@@ -56,13 +57,9 @@ do
         D=$(bc <<<"scale=10;( ${L} + ( ${N} / ${B} ) )")
         echo "N:${N} D:${D}"
         Latency_Bandwith=$(bc <<<"scale=10;${N} / ( ${L} + ( ${N} / ${B} ) )")
-        printf "$N ${Latency_Bandwith} \n" >> $OutTmpFile
+        printf "$N ${Latency_Bandwith} \n" >> $OutputDatFile
         NUMERO_LINEA=$(bc <<<"${NUMERO_LINEA}+1")
     done
-
-sort -n --key=1,1 $OutTmpFile > $OutputDatFile
-
-rm -f $OutTmpFile
 
 gnuplot <<-eNDgNUPLOTcOMMAND
     set term png size 900,700
