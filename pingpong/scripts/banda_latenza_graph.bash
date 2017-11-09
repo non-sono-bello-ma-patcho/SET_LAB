@@ -15,15 +15,23 @@ declare -a Denominatore
 
 for ProtocolName in "${arr[@]}"
 do
-    declare InputFile="${DataDir}/${ProtocolName}_throughput.dat"
+    declare InputFile="${DataDir}/${ProtocolName}_delay.dat"
     declare OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
     declare OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
+    # it's fun to find out you actually don't know what to do with these variables;
+    # even funnier is the fact you don't even know which variable to use. I want to cry rn.
+    
+	# estraggo no byte del minimo:
     N1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
-    T1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f3)
+    # estraggo delay del minimo:
+    T1=$(head -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f2)
+    
+	# estraggo no byte del massimo:
     N2=$(tail -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
-    T2=$(tail -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f3)
+    # estraggo delay del massimo:
+    T2=$(tail -n 1 ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f2)
     
     #calcolo le costanti
     echo 'calcolo costanti'
@@ -34,15 +42,13 @@ do
     L=$(bc <<< "scale=20;var1=${DelayMax}*${N2};var2=${DelayMin}*${N1};var3=var1-var2;var3/${Denominatore}")
     B=$(bc <<< "scale=20;var1=${N2}-${N1};var1/${Denominatore}")
 
-    echo $B
-    echo $L
+    echo bandwiwidth: $B
+    echo latency: $L
     #stampa i valori Numero_byte e Latenza sul file .dat
     echo 'stampo i valori Numero_byte e Latenza sul file .dat'
-    N_LINEE_FILE=$(wc -l "${DataDir}/${ProtocolName}_throughput.dat" | cut -d ' ' -f1)
+    N_LINEE_FILE=$(wc -l "${DataDir}/${ProtocolName}_delay.dat" | cut -d ' ' -f1)
     NUMERO_LINEA=1
-    
-    echo "numero linee: $N_LINEE_FILE"
-    echo $NUMERO_LINEA
+
     while [ $NUMERO_LINEA -lt $N_LINEE_FILE ]
     do 
         N=$(sed "${NUMERO_LINEA}q;d" ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
