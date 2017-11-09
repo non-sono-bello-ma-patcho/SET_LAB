@@ -15,7 +15,7 @@ declare -a Denominatore
 
 for ProtocolName in "${arr[@]}"
 do
-    declare InputFile="${DataDir}/${ProtocolName}_delay.dat"
+    declare InputFile="${DataDir}/${ProtocolName}_throughput.dat"
     declare OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
     declare OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
     #ottengo parametri
