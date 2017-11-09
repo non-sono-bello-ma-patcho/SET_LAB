@@ -46,7 +46,7 @@ do
     echo latency: $L
     #stampa i valori Numero_byte e Latenza sul file .dat
     echo 'stampo i valori Numero_byte e Latenza sul file .dat'
-    N_LINEE_FILE=$(wc -l "${DataDir}/${ProtocolName}_delay.dat" | cut -d ' ' -f1)
+    N_LINEE_FILE=$(wc -l "${DataDir}/${ProtocolName}_throughput.dat" | cut -d ' ' -f1)
     NUMERO_LINEA=1
 
     while [ $NUMERO_LINEA -lt $N_LINEE_FILE ]
