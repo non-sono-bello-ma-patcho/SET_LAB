@@ -11,11 +11,14 @@ for ProtocolName in "${arr[@]}"
 do
     InputFile="${DataDir}/${ProtocolName}_throughput.dat"
     OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
+    OutTmpFile="${DataDir}/${ProtocolName}_delay_tmp.dat"
     OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
+    
     if [ -e ${OutputDatFile} ]
      then 
      	echo  removing older version
-        rm -f ${Outputdatfile} ${OutputPngFile} 
+        rm -f ${OutputDatFile} 
+        rm -f ${OutputPngFile} 
     fi
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
@@ -53,9 +56,13 @@ do
         D=$(bc <<<"scale=10;( ${L} + ( ${N} / ${B} ) )")
         echo "N:${N} D:${D}"
         Latency_Bandwith=$(bc <<<"scale=10;${N} / ( ${L} + ( ${N} / ${B} ) )")
-        printf "$N ${Latency_Bandwith} \n" >> ${OutputDatFile}
+        printf "$N ${Latency_Bandwith} \n" >> $OutTmpFile
         NUMERO_LINEA=$(bc <<<"${NUMERO_LINEA}+1")
     done
+
+sort -n --key=1,1 $OutTmpFile > $OutputDatFile
+
+rm -f $OutTmpFile
 
 gnuplot <<-eNDgNUPLOTcOMMAND
     set term png size 900,700
