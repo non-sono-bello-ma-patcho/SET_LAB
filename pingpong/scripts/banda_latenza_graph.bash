@@ -18,6 +18,13 @@ do
     declare InputFile="${DataDir}/${ProtocolName}_throughput.dat"
     declare OutputPngFile="${DataDir}/${ProtocolName}_banda_latenza.png"
     declare OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
+    
+    if [ -e $OutputDatFile ]
+    then
+    	echo removing older version:
+    	rm $OutputPngFile $OutputDatFile -f
+    fi
+
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
     # it's fun to find out you actually don't know what to do with these variables;
