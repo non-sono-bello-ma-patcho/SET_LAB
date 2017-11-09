@@ -41,18 +41,13 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** Store the current time in send_time ***/
 /*** TO BE DONE START ***/
-	int gt_status = clock_gettime(CLOCK_REALTIME, &send_time);
-	if(gt_status!=0){
-		fprintf(stderr, "clock_gettime:%s\n", strerror(gt_status));
-		exit(EXIT_FAILURE);
-	}
+	if(clock_gettime(CLOCK_REALTIME, &send_time)!=0) fail_errno("clock_gettime");
 /*** TO BE DONE END ***/
 
     /*** Send the message through the socket ***/
 /*** TO BE DONE START ***/
 	sent_bytes = send(tcp_socket, message, msg_size,0);
-		if (sent_bytes != msg_size)
-			fail_errno("Error sending data");
+		if (sent_bytes != msg_size)	fail_errno("Error sending data");
 /*** TO BE DONE END ***/
 
     /*** Receive answer through the socket (blocking) ***/
@@ -64,11 +59,7 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** Store the current time in recv_time ***/
 /*** TO BE DONE START ***/
-	gt_status = clock_gettime(CLOCK_REALTIME, &recv_time);
-	if(gt_status<0){
-		fprintf(stderr, "clock_gettime:%s\n", strerror(gt_status));
-		exit(EXIT_FAILURE);
-	}
+	if(clock_gettime(CLOCK_REALTIME, &recv_time)<0) fail_errno("clock_gettime");
 /*** TO BE DONE END ***/
 
 	printf("tcp_ping received %zd bytes back\n", recv_bytes);
@@ -106,11 +97,7 @@ int main(int argc, char **argv){
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
-	int status = getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo);
-	if(status!=0){
-		fprintf(stderr, "addrinfo:%s\n", gai_strerror(status));
-		exit(EXIT_FAILURE);
-	}
+	if(getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo)!=0) fail_errno("getaddrinfo");
 /*** TO BE DONE END ***/
 
     /*** Print address of the Pong server before trying to connect ***/
@@ -120,14 +107,8 @@ int main(int argc, char **argv){
     /*** create a new TCP socket and connect it with the server ***/
 /*** TO BE DONE START ***/
 	tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if(tcp_socket<0){
-		perror("socket");
-		exit(EXIT_FAILURE);
-	}
-	if(connect(tcp_socket, (struct sockaddr *) ipv4, sizeof(*ipv4))<0){ /* sizeof(*ipv4) mannaggia la miseria */
-		fprintf(stderr, "connect:%s\n", strerror(errno));
-		exit(EXIT_FAILURE);		
-	}
+	if(tcp_socket<0) fail_errno("socket");
+	if(connect(tcp_socket, (struct sockaddr *) ipv4, sizeof(*ipv4))<0) fail_errno("connect");
 /*** TO BE DONE END ***/
 
 	freeaddrinfo(server_addrinfo);
@@ -142,10 +123,7 @@ int main(int argc, char **argv){
 
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
-	if(write(tcp_socket, request, strlen(request))<0){
-		perror("write");
-		exit(EXIT_FAILURE);
-	}
+	if(write(tcp_socket, request, strlen(request))<0) fail_errno("write");
 /*** TO BE DONE END ***/
 
 	nr = read(tcp_socket, answer, sizeof(answer));
@@ -155,8 +133,7 @@ int main(int argc, char **argv){
 
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
-	fprintf(stderr, "answer: %s\n", answer);
-	if(strcmp(answer, "OK\n")!=0)	fail_errno("No answer from Pong :-(");
+	if(strcmp(answer, "OK\n")!=0) fail_errno("No answer from Pong :-(");
 /*** TO BE DONE END ***/
 
     /*** else ***/
