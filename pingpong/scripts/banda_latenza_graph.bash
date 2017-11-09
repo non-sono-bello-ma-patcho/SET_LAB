@@ -14,8 +14,8 @@ do
     OutputDatFile="${DataDir}/${ProtocolName}_delay.dat"
     if [ -e ${OutputDatFile} ]
      then 
-        rm -f ${Outputdatfile} 
-        rm -f ${OutputPngFile} 
+     	echo  removing older version
+        rm -f ${Outputdatfile} ${OutputPngFile} 
     fi
     #ottengo parametri
     #f2 0 f3 cioè devo usare T come valore mediano o medio?
