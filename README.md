@@ -32,5 +32,5 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
 - [auxiliar libraries](pingpong/pingpong_lib);
 - [shell scripts](pingpong/scripts):
    - [mkfile.bash](pingpong/scripts/mkfile.bash)(usage`mkfile.bash <min dimension> <max dimension for udp message> <max dimension for tcp message> <ripetitions>`) generates throughtput diagrams basing on message dimension for both udp and tcp client;
-
+   - [banda_latenza_graph.bash](pingpong/scripts/banda_latenza_graph.bash) generates a .png file;
 \* *actually accept() create a new socket on server (connected with client) while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
