@@ -36,12 +36,12 @@ double do_ping(size_t msg_size, int msg_no, char message[msg_size], int tcp_sock
 
     /*** write msg_no at the beginning of the message buffer ***/
 /*** TO BE DONE START ***/
-	sprintf(message, "%i\n", msg_no);
+	if(sprintf(message, "%i\n", msg_no)<0) fail_errno("error sprintf()");
 /*** TO BE DONE END ***/
 
     /*** Store the current time in send_time ***/
 /*** TO BE DONE START ***/
-	if(clock_gettime(CLOCK_REALTIME, &send_time)!=0) fail_errno("clock_gettime");
+	if(clock_gettime(CLOCK_REALTIME, &send_time)<0) fail_errno("clock_gettime");
 /*** TO BE DONE END ***/
 
     /*** Send the message through the socket ***/
@@ -93,11 +93,12 @@ int main(int argc, char **argv){
 	gai_hints.ai_family = AF_INET;
 	gai_hints.ai_socktype = SOCK_STREAM;
 	gai_hints.ai_flags = AI_PASSIVE;
+	gai_hints.ai_protocol= IPPROTO_TCP;
 /*** TO BE DONE END ***/
 
     /*** call getaddrinfo() in order to get Pong Server address in binary form ***/
 /*** TO BE DONE START ***/
-	if(getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo)!=0) fail_errno("getaddrinfo");
+	if((gai_rv=getaddrinfo(argv[1], argv[2], &gai_hints, &server_addrinfo))!=0) fail_errno(gai_strerror(gai_rv));
 /*** TO BE DONE END ***/
 
     /*** Print address of the Pong server before trying to connect ***/
@@ -106,9 +107,11 @@ int main(int argc, char **argv){
 
     /*** create a new TCP socket and connect it with the server ***/
 /*** TO BE DONE START ***/
-	tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if(tcp_socket<0) fail_errno("socket");
-	if(connect(tcp_socket, (struct sockaddr *) ipv4, sizeof(*ipv4))<0) fail_errno("connect");
+    tcp_socket = socket(server_addrinfo->ai_family, server_addrinfo->ai_socktype, server_addrinfo->ai_protocol);
+    if (tcp_socket < 0)
+	    fail_errno("ERROR:can not initialize the socket \n");
+	if (connect(tcp_socket, server_addrinfo->ai_addr, server_addrinfo->ai_addrlen) < 0)
+		fail_errno("ERROR:can not connect to server");
 /*** TO BE DONE END ***/
 
 	freeaddrinfo(server_addrinfo);
@@ -123,17 +126,19 @@ int main(int argc, char **argv){
 
     /*** Write the request on socket ***/
 /*** TO BE DONE START ***/
-	if(write(tcp_socket, request, strlen(request))<0) fail_errno("write");
+	if(send(tcp_socket, request, strlen(request), 0) <0)
+		fail_errno("unable to send messages through the socket");
 /*** TO BE DONE END ***/
-
-	nr = read(tcp_socket, answer, sizeof(answer));
-	if (nr < 0)
-		fail_errno("TCP Ping could not receive answer from Pong server");
-		
-
+	if((nr =read(tcp_socket, answer, sizeof(answer)))<0)
+		fail_errno("Unable to receive answer from Pong server");
     /*** Check if the answer is OK, and fail if it is not ***/
 /*** TO BE DONE START ***/
-	if(strcmp(answer, "OK\n")!=0) fail_errno("No answer from Pong :-(");
+	if(strcmp(answer, "OK\n")!=0)
+	{   
+	    shutdown(tcp_socket, SHUT_RDWR);
+	    close(tcp_socket); 
+	    fail_errno("Server refused connection. closing communication channel...");  
+	}
 /*** TO BE DONE END ***/
 
     /*** else ***/
