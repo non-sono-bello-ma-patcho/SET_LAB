@@ -48,7 +48,7 @@ do
         #echo ${NUMERO_LINEA}
         N=$(sed "${NUMERO_LINEA}q;d" ${DataDir}/${ProtocolName}_throughput.dat | cut -d' ' -f1)
         D=$(bc <<<"scale=10;( ${L} + ( ${N} / ${B} ) )")
-        Latency_Bandwith=$(bc <<<"scale=10;${N} / ( ${L} + ( ${N} / ${B} ) )")
+        Latency_Bandwith=$(bc <<<"scale=10;${N} / ( ${D} )")
         echo "${NUMERO_LINEA} N:${N} D:${D} L_B:${Latency_Bandwith} "
         printf "$N ${Latency_Bandwith} \n" >> ${OutputDatFile}
         NUMERO_LINEA=$(bc <<<"${NUMERO_LINEA}+1")
