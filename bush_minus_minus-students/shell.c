@@ -82,9 +82,13 @@ void wait_for_termination_of_children()
 	 * e WEXITSTATUS per vedere se un processo e` terminato con exit
 	 * ed estrarne lo stato) */
 /*** TO BE DONE START ***/
+	int status;
+	if(wait(status)<0) fail_errno("wait");
+	if(!WIFIEXITED(&status)) fail_errno("Process hasn't exited normally"); /* macro WIFIEXITED return true if child exit normally */
+	fprintf(stderr, "exit status: %d\n", WEXITSTATUS(status)); /* WEXITSTATUS extract exit status */
 /*** TO BE DONE END ***/
 }
-
+	
 void sh_build_environment(struct shell *this) {
 	free_envp(this->environment);
 	this->environment = vt_to_envp(this->vars);

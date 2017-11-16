@@ -50,12 +50,12 @@ void make_sure_PWD_is_set(struct var_table *vt)
 	/* la variabile PWD non era presente; crearla e inizializzarla
 	 * al valore restituito dalla system call getcwd() */
 /*** TO BE DONE START ***/
-    cwd=getcwd(NULL,0);
+    cwd=getcwd(NULL,0); /* get current working directory */
     if(cwd==NULL)
     {
-        fail_errno("ERRORE getcwd()");
+        fail_errno("Can't get current working directory");
     }
-    vt_set_value(vt, PATH,cwd);
+    vt_set_value(vt, PWD,cwd); /* set the value of PWD in var table */
     free(cwd);
 /*** TO BE DONE END ***/
 
