@@ -16,7 +16,7 @@
 
 #ifndef AST_H
 #define AST_H
-
+#define DEBUG
 #include <stdlib.h>
 
 struct shell;

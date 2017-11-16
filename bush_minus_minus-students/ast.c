@@ -85,6 +85,10 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 	 * - gestire il cambiamento della variabile PWD */
 
 /*** TO BE DONE START ***/
+	char* path = impl->pathname;
+	if(path==NULL) path = vt_lookup(sh_get_var_table(sh), HOME);
+	if(chdir(path)<0) fail_errno("Cannot change directory");
+	vt_set_value(sh_get_var_table(sh), PWD, getcwd(NULL, 0));
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -271,6 +275,19 @@ char *find_in_path(const char *path, const char *name)
 	 * In caso contrario, restituire NULL */
 
 /*** TO BE DONE START ***/
+	if(strchr(name, '/')!=NULL) return strdup(name);
+	/* 	search in all directories 
+		path has form /path1:/path2:.. in which fucking way do I parse it?	
+	*/
+	char* tmp = strtok(path, ":");
+	for(;tmp!=NULL;tmp = strtok(NULL, ":")){
+		char* tempath[128];
+		strcpy(tempath, tmp);
+		strcat(tempath, "/");
+		strcat(tempath, name);
+		if(access(tempath, F_OK | X_OK)>0) return tempath;
+	}
+
 /*** TO BE DONE END ***/
 	fprintf(stderr, "%s : command not found.\n", name);
 	return NULL;

@@ -59,7 +59,8 @@ char **vt_to_envp(const struct var_table * const this) {
     char** environ=NULL; /* what is the utility of this? */
     char* temp;/*da eliminare succ*/
     environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
-    for(size_t i=0;i<(this->len);i++,v++)
+    size_t i;
+    for(i=0;i<(this->len);i++,v++)
     {
         environ[i]=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)); /*  */
         temp=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)+1); /* temp have to contain var+=+value */
@@ -70,7 +71,7 @@ char **vt_to_envp(const struct var_table * const this) {
 
         */
     	if(strcpy(temp, v->name)==NULL) fail_errno("strcpy");
-    	if(strcat(temp, "h")==NULL) fail_errno("strcat");
+    	if(strcat(temp, "=")==NULL) fail_errno("strcat");
     	if(strcat(temp, v->value)==NULL) fail_errno("strcat");
         #ifdef DEBUG
         printf("temp=%s;",temp);
