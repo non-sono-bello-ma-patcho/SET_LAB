@@ -88,7 +88,7 @@ void wait_for_termination_of_children()
 	fprintf(stderr, "exit status: %d\n", WEXITSTATUS(status)); /* WEXITSTATUS extract exit status */
 /*** TO BE DONE END ***/
 }
-
+	
 void sh_build_environment(struct shell *this) {
 	free_envp(this->environment);
 	this->environment = vt_to_envp(this->vars);
