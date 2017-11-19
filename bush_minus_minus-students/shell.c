@@ -41,12 +41,12 @@ static void free_envp(char **envp)
     for(char** v=envp;v!=NULL;v++)
     {
         #ifdef DEBUG
-        printf("libero la memoria della variabile:%s;",v);
+        printf("libero la memoria della variabile:%s;\n",*v);
         #endif
         free(v);
     }
     #ifdef DEBUG
-        printf("libero la memoria puntata da envp:%s;",envp);
+        printf("libero la memoria puntata da envp:%s;\n",envp);
     #endif
     free(envp);
 /*** TO BE DONE END ***/

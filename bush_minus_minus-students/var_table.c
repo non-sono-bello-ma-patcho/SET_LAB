@@ -56,14 +56,17 @@ char **vt_to_envp(const struct var_table * const this) {
 	 * di terminare l'array con NULL */
 /*** TO BE DONE START ***/
     struct var *v = this->vars;
-    char** environ=NULL; /* what is the utility of this? */
+    char** environ=NULL;
     char* temp;/*da eliminare succ*/
     environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
     size_t i;
-    for(i=0;i<(this->len);i++,v++)
+    for(i=0;i<(this->len)+1;i++,v++)
     {
+        #ifdef DEBUG
+    		printf("trying to write: %s=%S\n", v->name, v->value);
+        #endif
         environ[i]=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)); /*  */
-        temp=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)+1); /* temp have to contain var+=+value */
+        temp=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)+2); /* temp have to contain var+=+value */
         /*temp=strcat(v->name,"=\0");
         temp=strcat(temp,v->value);
 
@@ -71,12 +74,13 @@ char **vt_to_envp(const struct var_table * const this) {
 
         */
     	if(strcpy(temp, v->name)==NULL) fail_errno("strcpy");
-    	if(strcat(temp, "=")==NULL) fail_errno("strcat");
-    	if(strcat(temp, v->value)==NULL) fail_errno("strcat");
+    	if(strncat(temp, "=", sizeof(temp))==NULL) fail_errno("strcat");
+    	if(strncat(temp, v->value, sizeof(temp))==NULL) fail_errno("strcat");
         #ifdef DEBUG
-        printf("temp=%s;",temp);
+        	printf("temp=%s;",temp);
         #endif
         environ[i]=temp;
+        free(temp);
     }
     
     /*aggiunge /0 alla fine dell'array*/

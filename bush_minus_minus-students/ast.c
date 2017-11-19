@@ -85,10 +85,10 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 	 * - gestire il cambiamento della variabile PWD */
 
 /*** TO BE DONE START ***/
-	char* path = impl->pathname;
-	if(path==NULL) path = vt_lookup(sh_get_var_table(sh), HOME);
+	// setting path variable:
+	char* const path= (impl->pathname==NULL? vt_lookup(sh_get_var_table(sh), HOME) : impl->pathname);
 	if(chdir(path)<0) fail_errno("Cannot change directory");
-	vt_set_value(sh_get_var_table(sh), PWD, getcwd(NULL, 0));
+	vt_set_value(sh_get_var_table(sh), PWD, path);
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -327,6 +327,8 @@ enum next_action ext_cmd_execute(const struct node * const this, struct shell * 
 	/* Creare un processo figlio usando fork(); assegnare a pid il suo valore
 	 * di ritorno, invocando fail_errno se la syscall fallisce */
 /*** TO BE DONE START ***/
+	pid = fork();
+	if(pid <0) fail_errno("Unable to fork a new process");
 /*** TO BE DONE END ***/
 	if (pid == 0) {
 		redirect_fd(in_redir, STDIN_FILENO);
@@ -334,6 +336,7 @@ enum next_action ext_cmd_execute(const struct node * const this, struct shell * 
 		/* usare execve per lanciare l'eseguibile, segnalando un errore (e terminando il processo figlio) se
 		 * la syscall fallisce. */
 /*** TO BE DONE START ***/
+	if(execve(executable, )<0) fail_errno("Unable to execute command");	
 /*** TO BE DONE END ***/
 	}
 	cleanup_and_return:
