@@ -86,7 +86,7 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 
 /*** TO BE DONE START ***/
 	// setting path variable:
-	char* const path= (impl->pathname==NULL? vt_lookup(sh_get_var_table(sh), HOME) : impl->pathname);
+	char* const path= (impl->pathname==NULL? (char *const)vt_lookup(sh_get_var_table(sh), HOME) : (char *const)impl->pathname);
 	if(chdir(path)<0) fail_errno("Cannot change directory");
 	vt_set_value(sh_get_var_table(sh), PWD, path);
 /*** TO BE DONE END ***/
@@ -282,10 +282,8 @@ char *find_in_path(const char *path, const char *name)
 	char* tmp = strtok(path, ":");
 	for(;tmp!=NULL;tmp = strtok(NULL, ":")){
 		char* tempath[128];
-		strcpy(tempath, tmp);
-		strcat(tempath, "/");
-		strcat(tempath, name);
-		if(access(tempath, F_OK | X_OK)>0) return tempath;
+		sprintf(tempath, "%s/%s", tmp, name);
+		if(access(tempath, F_OK | X_OK)>0) return (char *const)tempath;
 	}
 
 /*** TO BE DONE END ***/
@@ -298,6 +296,9 @@ void redirect_fd(int from_fd, int to_fd)
 	/* se from_fd non è NO_REDIR, redirezionare da from_fd a to_fd,
 	 * usando la syscall dup2() */
 /*** TO BE DONE START ***/
+	assert(from_fd==NO_REDIR);
+	dup2(from_fd, to_fd);
+	close(from_fd);
 /*** TO BE DONE END ***/
 }
 
@@ -336,7 +337,7 @@ enum next_action ext_cmd_execute(const struct node * const this, struct shell * 
 		/* usare execve per lanciare l'eseguibile, segnalando un errore (e terminando il processo figlio) se
 		 * la syscall fallisce. */
 /*** TO BE DONE START ***/
-	if(execve(executable, )<0) fail_errno("Unable to execute command");	
+	if(execve(executable, impl->args, vt_to_envp(sh_get_var_table(sh)))<0) fail_errno("Unable to execute command");	
 /*** TO BE DONE END ***/
 	}
 	cleanup_and_return:
@@ -439,6 +440,12 @@ enum next_action pipe_execute(const struct node * const this, struct shell * con
 	 * Poi, fare in modo che l'output del comando left_cmd sia rediretto su pipes[1] e
 	 * l'input del comando right_cmd su pipes[0] */
 /*** TO BE DONE START ***/
+	const struct node * const left_cmd = impl->left_cmd;
+	const struct node * const right_cmd = impl->right_cmd;
+	if(pipe(pipes)<0) fail_errno("Couldn't init pipes");
+	for(i=0; i<2; i++)	fcntl(pipes[i], F_SETFD, FD_CLOEXEC);
+	ext_cmd_execute(left_cmd, sh, 0, pipes[1]);
+	ext_cmd_execute(right_cmd, sh, pipes[0], 1);
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;

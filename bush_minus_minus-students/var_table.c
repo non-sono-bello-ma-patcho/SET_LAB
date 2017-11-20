@@ -60,29 +60,14 @@ char **vt_to_envp(const struct var_table * const this) {
     char* temp;/*da eliminare succ*/
     environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
     size_t i;
-    for(i=0;i<(this->len)+1;i++,v++)
-    {
-        #ifdef DEBUG
-    		printf("trying to write: %s=%S\n", v->name, v->value);
-        #endif
-        environ[i]=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)); /*  */
-        temp=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)+2); /* temp have to contain var+=+value */
-        /*temp=strcat(v->name,"=\0");
-        temp=strcat(temp,v->value);
-
-		this won't work, strcat will raise segfault since the is no room for another character in v->name...
-
-        */
-    	if(strcpy(temp, v->name)==NULL) fail_errno("strcpy");
-    	if(strncat(temp, "=", sizeof(temp))==NULL) fail_errno("strcat");
-    	if(strncat(temp, v->value, sizeof(temp))==NULL) fail_errno("strcat");
+    for(i=0;i<(this->len)+1;i++,v++){
+        temp=(char*)my_malloc(sizeof(v->name)+sizeof(v->value)+2);
+    	sprintf(temp, "%s=%s", v->name, v->value);
         #ifdef DEBUG
         	printf("temp=%s;",temp);
         #endif
         environ[i]=temp;
-        free(temp);
     }
-    
     /*aggiunge /0 alla fine dell'array*/
     environ[i]=NULL;/*i uscita del ciclo è uguale ad vt->len*/
     return environ;  /* maybe? */
