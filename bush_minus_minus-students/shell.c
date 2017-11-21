@@ -85,7 +85,7 @@ void wait_for_termination_of_children()
 /*** TO BE DONE START ***/
 	int status;
 	while(wait(&status)>0){
-		if(!WIFEXITED(&status)) fail_errno("Process hasn't exited normally"); /* macro WIFIEXITED return true if child exit normally */
+		if(!WIFEXITED(status)) fail_errno("Process hasn't exited normally"); /* macro WIFIEXITED return true if child exit normally */
 		fprintf(stderr, "exit status: %d\n", WEXITSTATUS(status)); /* WEXITSTATUS extract exit status */
 	}
 	if(errno != ECHILD) fail_errno("Child process exited with status");

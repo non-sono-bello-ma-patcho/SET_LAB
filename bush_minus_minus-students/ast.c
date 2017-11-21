@@ -89,6 +89,11 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 	const char* const pwd = vt_lookup(sh_get_var_table(sh), PWD);
 	char* new_path;
 	if(impl->pathname==NULL) new_path=(char *const)vt_lookup(sh_get_var_table(sh), HOME);
+	else if(strcmp(impl->pathname, "..")==0){
+		size_t path_len = strrchr(pwd, '/') - pwd; /* obtain lenght of path without inner dir */
+		new_path=(char*)my_malloc(path_len);
+		strncpy(new_path, pwd, path_len);
+	}
 	else{
 		new_path = (char*)my_malloc(strlen(impl->pathname)+strlen(pwd)+2*sizeof(char)); /* build a string long as pwd+/+dirname */
 		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
@@ -286,11 +291,12 @@ char *find_in_path(const char *path, const char *name)
 		path has form /path1:/path2:.. in which fucking way do I parse it?	
 	*/
 	char* tmp;
+	/*
 	for(;tmp!=NULL;tmp = strtok(NULL, ":")){
 		char* const tempath=my_malloc(strlen(path)+strlen(name)+1);
 		sprintf(tempath, "%s/%s", tmp, name);
 		if(access(tempath, X_OK)>0) return (char *const)tempath;
-	}
+	}*/
 	while(path) {
 		char *const delimiter = strchr(path, ':'); /* return delimiter position */
 		size_t path_len;
@@ -360,7 +366,7 @@ enum next_action ext_cmd_execute(const struct node * const this, struct shell * 
 		/* usare execve per lanciare l'eseguibile, segnalando un errore (e terminando il processo figlio) se
 		 * la syscall fallisce. */
 /*** TO BE DONE START ***/
-	if(execve(executable, impl->args, vt_to_envp(sh_get_var_table(sh)))<0) fail_errno("Unable to execute command");	
+	if(execve(executable, impl->args, vt_to_envp(sh_get_var_table(sh)))) fail_errno("Unable to execute command");	
 /*** TO BE DONE END ***/
 	}
 	cleanup_and_return:
