@@ -287,16 +287,7 @@ char *find_in_path(const char *path, const char *name)
 
 /*** TO BE DONE START ***/
 	if(strchr(name, '/')!=NULL) return strdup(name);
-	/* 	search in all directories 
-		path has form /path1:/path2:.. in which fucking way do I parse it?	
-	*/
 	char* tmp;
-	/*
-	for(;tmp!=NULL;tmp = strtok(NULL, ":")){
-		char* const tempath=my_malloc(strlen(path)+strlen(name)+1);
-		sprintf(tempath, "%s/%s", tmp, name);
-		if(access(tempath, X_OK)>0) return (char *const)tempath;
-	}*/
 	while(path) {
 		char *const delimiter = strchr(path, ':'); /* return delimiter position */
 		size_t path_len;
@@ -472,14 +463,12 @@ enum next_action pipe_execute(const struct node * const this, struct shell * con
 	 * Poi, fare in modo che l'output del comando left_cmd sia rediretto su pipes[1] e
 	 * l'input del comando right_cmd su pipes[0] */
 /*** TO BE DONE START ***/
-	const struct node * const left_cmd = impl->left_cmd;
-	const struct node * const right_cmd = impl->right_cmd;
+	struct node * const left_cmd = impl->left_cmd;
+	struct node * const right_cmd = impl->right_cmd;
 	if(pipe(pipes)<0) fail_errno("Couldn't init pipes");
 	for(i=0; i<2; i++)	fcntl(pipes[i], F_SETFD, FD_CLOEXEC);
-	puts("executing left_cmd");
-	ext_cmd_execute(left_cmd, sh, 0, pipes[1]);
-	puts("executingn right_cmd");
-	ext_cmd_execute(right_cmd, sh, pipes[0], 1);
+	ext_cmd_execute(left_cmd, sh, in_redir, pipes[1]);
+	ext_cmd_execute(right_cmd, sh, pipes[0], out_redir);
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;

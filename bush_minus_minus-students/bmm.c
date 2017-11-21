@@ -52,7 +52,6 @@ void make_sure_PWD_is_set(struct var_table *vt)
 /*** TO BE DONE START ***/
     cwd=getcwd(NULL, 0); /* get current working directory */
     if(cwd==NULL) fail_errno("Can't get current working directory");
-    printf("setting pwd: %s\n", cwd);
     vt_set_value(vt, PWD,cwd); /* set the value of PWD in var table */
     free(cwd);
 /*** TO BE DONE END ***/
