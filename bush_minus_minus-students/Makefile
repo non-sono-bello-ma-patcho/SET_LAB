@@ -39,4 +39,3 @@ $(BIN_DIR):
 
 # tgz-full: clean
 # 	cd .. ; tar cvzf bush_minus_minus-full.tgz --exclude=bush_minus_minus-full/bin --exclude=bush_minus_minus-full/.idea bush_minus_minus-full
-
