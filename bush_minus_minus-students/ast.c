@@ -301,7 +301,7 @@ char *find_in_path(const char *path, const char *name)
 		char *const delimiter = strchr(path, ':'); /* return delimiter position */
 		size_t path_len;
 		if (!delimiter)
-			continue;
+			break;
 		path_len = delimiter - path; /* return path len before ':' */
 		tmp = my_malloc(path_len +2+ strlen(name));
 		strncpy(tmp, path, path_len);
@@ -312,6 +312,9 @@ char *find_in_path(const char *path, const char *name)
 		#endif
 		if(access(tmp, F_OK | X_OK)==0) return (char* const)tmp;
 		const char * const new_path = path+path_len+1;
+		#ifdef DEBUG
+		printf("now path is: \e[95m%s\e[0m\n", path);
+		#endif
 		path = new_path;
 	}
 
@@ -325,7 +328,7 @@ void redirect_fd(int from_fd, int to_fd)
 	/* se from_fd non è NO_REDIR, redirezionare da from_fd a to_fd,
 	 * usando la syscall dup2() */
 /*** TO BE DONE START ***/
-	assert(from_fd==NO_REDIR);
+	if(from_fd==NO_REDIR) return;
 	dup2(from_fd, to_fd);
 	close(from_fd);
 /*** TO BE DONE END ***/
@@ -473,7 +476,9 @@ enum next_action pipe_execute(const struct node * const this, struct shell * con
 	const struct node * const right_cmd = impl->right_cmd;
 	if(pipe(pipes)<0) fail_errno("Couldn't init pipes");
 	for(i=0; i<2; i++)	fcntl(pipes[i], F_SETFD, FD_CLOEXEC);
+	puts("executing left_cmd");
 	ext_cmd_execute(left_cmd, sh, 0, pipes[1]);
+	puts("executingn right_cmd");
 	ext_cmd_execute(right_cmd, sh, pipes[0], 1);
 /*** TO BE DONE END ***/
 
