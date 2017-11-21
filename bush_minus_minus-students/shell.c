@@ -38,12 +38,13 @@ static void free_envp(char **envp)
 	/* richiamare la funzione free per rilasciare la memoria
 	 * allocata per l'ambiente envp */
 /*** TO BE DONE START ***/
-    for(char** v=envp;v!=NULL;v++)
+	if(envp==NULL) return;
+    for(char* v=*envp;v!=NULL;v++)
     {
         #ifdef DEBUG
         printf("libero la memoria della variabile:%s;\n",*v);
         #endif
-        free(v);
+        if(v) free(v);
     }
     #ifdef DEBUG
         printf("libero la memoria puntata da envp:%s;\n",envp);
@@ -83,9 +84,11 @@ void wait_for_termination_of_children()
 	 * ed estrarne lo stato) */
 /*** TO BE DONE START ***/
 	int status;
-	if(wait(&status)<0) fail_errno("wait");
-	if(!WIFEXITED(&status)) fail_errno("Process hasn't exited normally"); /* macro WIFIEXITED return true if child exit normally */
-	fprintf(stderr, "exit status: %d\n", WEXITSTATUS(status)); /* WEXITSTATUS extract exit status */
+	while(wait(&status)>0){
+		if(!WIFEXITED(&status)) fail_errno("Process hasn't exited normally"); /* macro WIFIEXITED return true if child exit normally */
+		fprintf(stderr, "exit status: %d\n", WEXITSTATUS(status)); /* WEXITSTATUS extract exit status */
+	}
+	if(errno != ECHILD) fail_errno("Child process exited with status");
 /*** TO BE DONE END ***/
 }
 	

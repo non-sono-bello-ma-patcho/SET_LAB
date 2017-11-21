@@ -86,9 +86,15 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 
 /*** TO BE DONE START ***/
 	// setting path variable:
-	char* const path= (impl->pathname==NULL? (char *const)vt_lookup(sh_get_var_table(sh), HOME) : (char *const)impl->pathname);
-	if(chdir(path)<0) fail_errno("Cannot change directory");
-	vt_set_value(sh_get_var_table(sh), PWD, path);
+	const char* const pwd = vt_lookup(sh_get_var_table(sh), PWD);
+	char* new_path;
+	if(impl->pathname==NULL) new_path=(char *const)vt_lookup(sh_get_var_table(sh), HOME);
+	else{
+		new_path = (char*)my_malloc(strlen(impl->pathname)+strlen(pwd)+2*sizeof(char)); /* build a string long as pwd+/+dirname */
+		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
+	}
+	if(chdir(new_path)<0) fprintf(stderr, "Cannot open %s: %s\n", impl->pathname ,strerror(errno));
+	else vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -279,11 +285,28 @@ char *find_in_path(const char *path, const char *name)
 	/* 	search in all directories 
 		path has form /path1:/path2:.. in which fucking way do I parse it?	
 	*/
-	char* tmp = strtok(path, ":");
+	char* tmp;
 	for(;tmp!=NULL;tmp = strtok(NULL, ":")){
-		char* tempath[128];
+		char* const tempath=my_malloc(strlen(path)+strlen(name)+1);
 		sprintf(tempath, "%s/%s", tmp, name);
-		if(access(tempath, F_OK | X_OK)>0) return (char *const)tempath;
+		if(access(tempath, X_OK)>0) return (char *const)tempath;
+	}
+	while(path) {
+		char *const delimiter = strchr(path, ':'); /* return delimiter position */
+		size_t path_len;
+		if (!delimiter)
+			continue;
+		path_len = delimiter - path; /* return path len before ':' */
+		tmp = my_malloc(path_len +2+ strlen(name));
+		strncpy(tmp, path, path_len);
+		strcat(tmp, "/");
+		strcat(tmp, name);
+		#ifdef DEBUG
+		printf("checking: %s\n", tmp);
+		#endif
+		if(access(tmp, F_OK | X_OK)==0) return (char* const)tmp;
+		const char * const new_path = path+path_len+1;
+		path = new_path;
 	}
 
 /*** TO BE DONE END ***/
