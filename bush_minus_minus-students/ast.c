@@ -85,10 +85,11 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 	 * - gestire il cambiamento della variabile PWD */
 
 /*** TO BE DONE START ***/
-	// setting path variable:
+	// setting path variab 	le:
 	const char* const pwd = vt_lookup(sh_get_var_table(sh), PWD);
 	char* new_path = NULL;
 	if(impl->pathname==NULL) new_path=(char *const)vt_lookup(sh_get_var_table(sh), HOME);
+	else if(*impl->pathname=='/') new_path = strdup(impl->pathname); /* complete path case */
 	else{
 		new_path = (char*)my_malloc((strlen(impl->pathname)+strlen(pwd)+2)*sizeof(char)); /* build a string long as pwd+/+dirname */
 		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
