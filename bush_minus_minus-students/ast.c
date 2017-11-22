@@ -87,19 +87,15 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 /*** TO BE DONE START ***/
 	// setting path variable:
 	const char* const pwd = vt_lookup(sh_get_var_table(sh), PWD);
-	char* new_path;
+	char* new_path = NULL;
 	if(impl->pathname==NULL) new_path=(char *const)vt_lookup(sh_get_var_table(sh), HOME);
-	else if(strcmp(impl->pathname, "..")==0){
-		size_t path_len = strrchr(pwd, '/') - pwd; /* obtain lenght of path without inner dir */
-		new_path=(char*)my_malloc(path_len);
-		strncpy(new_path, pwd, path_len);
-	}
 	else{
-		new_path = (char*)my_malloc(strlen(impl->pathname)+strlen(pwd)+2*sizeof(char)); /* build a string long as pwd+/+dirname */
+		new_path = (char*)my_malloc((strlen(impl->pathname)+strlen(pwd)+2)*sizeof(char)); /* build a string long as pwd+/+dirname */
 		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
 	}
-	if(chdir(new_path)<0) fprintf(stderr, "Cannot open %s: %s\n", impl->pathname ,strerror(errno));
+	if(chdir((const char*)new_path)<0) fprintf(stderr, "Cannot open %s: %s\n", impl->pathname ,strerror(errno));
 	else vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */
+	free(new_path);
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -294,7 +290,8 @@ char *find_in_path(const char *path, const char *name)
 		if (!delimiter)
 			break;
 		path_len = delimiter - path; /* return path len before ':' */
-		tmp = my_malloc(path_len +2+ strlen(name));
+		tmp = (char *)my_malloc(sizeof(char)*(path_len +2+ strlen(name)));
+		memset(tmp, 0, path_len +2+ strlen(name));
 		strncpy(tmp, path, path_len);
 		strcat(tmp, "/");
 		strcat(tmp, name);
@@ -302,6 +299,7 @@ char *find_in_path(const char *path, const char *name)
 		printf("checking: %s\n", tmp);
 		#endif
 		if(access(tmp, F_OK | X_OK)==0) return (char* const)tmp;
+		free(tmp);
 		const char * const new_path = path+path_len+1;
 		#ifdef DEBUG
 		printf("now path is: \e[95m%s\e[0m\n", path);

@@ -57,19 +57,19 @@ char **vt_to_envp(const struct var_table * const this) {
 /*** TO BE DONE START ***/
     struct var *v = this->vars;
     char** environ=NULL;
-    char* temp;/*da eliminare succ*/
+    char* temp; 
     environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
-    size_t i;
-    for(i=0;i<(this->len);i++,v++){
-        temp=(char*)my_malloc(strlen(v->name)+strlen(v->value)+2);
+    size_t i=0;
+    for(;i<this->len;v++, i++){
+        temp=(char*)my_malloc(sizeof(char)*(strlen(v->name)+strlen(v->value)+2));
     	sprintf(temp, "%s=%s", v->name, v->value);
         #ifdef DEBUG
         	printf("temp=%s;",temp);
         #endif
-        if(environ[i]) environ[i]=temp;
+        environ[i]=temp;
     }
     /*aggiunge /0 alla fine dell'array*/
-    if(environ[i]) environ[i]=NULL;/*i uscita del ciclo è uguale ad vt->len*/
+    environ[i]=NULL;/*i uscita del ciclo è uguale ad vt->len*/
     return environ;  /* maybe? */
 /*** TO BE DONE END ***/
 }
