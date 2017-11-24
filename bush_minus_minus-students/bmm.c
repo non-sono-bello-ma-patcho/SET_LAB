@@ -29,7 +29,7 @@ void inject_environment_into_vartable(struct var_table *vt)
 	for(; *envp; ++envp) {
 		const char * const current_var = *envp;
 		char * const equal_sign = strchr(current_var, '=');
-		size_t name_len;
+		ptrdiff_t name_len;
 		if (!equal_sign)
 			continue;
 		name_len = equal_sign - current_var;

@@ -38,13 +38,14 @@ static void free_envp(char **envp)
 	/* richiamare la funzione free per rilasciare la memoria
 	 * allocata per l'ambiente envp */
 /*** TO BE DONE START ***/
+	char** index = envp;
 	if(envp==NULL) return;
-    for(int i=0;envp[i];i++)
+    for(;*index;index++)
     {
         #ifdef DEBUG
         printf("libero la memoria della variabile:%s;\n",*v);
         #endif
-       	free(envp[i]);
+       	free(index);
     }
     #ifdef DEBUG
     printf("libero la memoria puntata da envp:%s;\n",envp);

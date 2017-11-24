@@ -95,13 +95,8 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
 	} 
 	if(chdir((const char*)new_path)<0) fprintf(stderr, "Cannot open %s: %s\n", impl->pathname ,strerror(errno));
-	else{		
-		if(strstr(new_path, "..")){
-			free(new_path);	
-			new_path = getcwd(NULL, 0); /* so I don't have to struggle in case of @cd ../.. */
-		}
-		vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */	
-	}	
+	else new_path = getcwd(NULL, 0); /* so I don't have to struggle in case of @cd ../.. */
+	vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */		
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -293,14 +288,13 @@ char *find_in_path(const char *path, const char *name)
 	char* init = (char *)path;
 	while(init) {
 		char *const delimiter = strchr(init, ':'); /* return delimiter position */
-		size_t path_len;
+		ptrdiff_t path_len;
 		if (!delimiter)
 			break;
 		path_len = delimiter - init; /* return path len before ':' */
 		tmp = (char *)my_malloc(sizeof(char)*(path_len +2+ strlen(name)));
-		memset(tmp, 0, path_len +2+ strlen(name));
 		strncpy(tmp, init, path_len);
-		strcat(tmp, "/");
+		strcpy(tmp+path_len, "/"); /* strncpy won't add \0 in certain cases */
 		strcat(tmp, name);
 		#ifdef DEBUG
 		printf("checking: %s\n", tmp);
@@ -471,8 +465,8 @@ enum next_action pipe_execute(const struct node * const this, struct shell * con
 	struct node * const right_cmd = impl->right_cmd;
 	if(pipe(pipes)<0) fail_errno("Couldn't init pipes");
 	for(i=0; i<2; i++)	fcntl(pipes[i], F_SETFD, FD_CLOEXEC);
-	ext_cmd_execute(left_cmd, sh, in_redir, pipes[1]);
-	ext_cmd_execute(right_cmd, sh, pipes[0], out_redir);
+	left_cmd->execute(left_cmd, sh, in_redir, pipes[1]);
+	right_cmd->execute(right_cmd, sh, pipes[0], out_redir);
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;

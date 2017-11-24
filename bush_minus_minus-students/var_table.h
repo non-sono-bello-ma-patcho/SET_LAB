@@ -18,6 +18,7 @@
 #define VARIABLES_H
 
 #include <stdio.h>
+#include <stddef.h>
 
 struct var_table;
 struct var_table *vt_new();

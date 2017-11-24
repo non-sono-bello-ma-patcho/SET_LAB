@@ -1,4 +1,4 @@
-/*
+ /*
  * bush--
  *
  * Programma sviluppato a supporto del laboratorio di
@@ -55,21 +55,18 @@ char **vt_to_envp(const struct var_table * const this) {
 	/* creare l'array con le variabili di ambiente, ricordarsi
 	 * di terminare l'array con NULL */
 /*** TO BE DONE START ***/
-    struct var *v = this->vars;
-    char** environ=NULL;
-    char* temp; 
-    environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
-    size_t i=0;
-    for(;i<this->len;v++, i++){
-        temp=(char*)my_malloc(sizeof(char)*(strlen(v->name)+strlen(v->value)+2));
-    	sprintf(temp, "%s=%s", v->name, v->value);
+    struct var *v = this->vars, *end = v+len;
+    char** environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
+    char** index=environ; 
+  	for(;;v++, index++){
+        *index=(char*)my_malloc(sizeof(char)*(strlen(v->name)+strlen(v->value)+2));
+    	sprintf(*index, "%s=%s", v->name, v->value);
         #ifdef DEBUG
-        	printf("temp=%s;",temp);
+        	printf("var=%s;",*index);
         #endif
-        environ[i]=temp;
     }
     /*aggiunge /0 alla fine dell'array*/
-    environ[i]=NULL;/*i uscita del ciclo è uguale ad vt->len*/
+    index=NULL;/*i uscita del ciclo è uguale ad vt->len*/
     return environ;  /* maybe? */
 /*** TO BE DONE END ***/
 }
