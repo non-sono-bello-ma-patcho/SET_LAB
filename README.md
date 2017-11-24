@@ -35,7 +35,10 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
    - [banda_latenza_graph.bash](pingpong/scripts/banda_latenza_graph.bash) generates a .png file;
 
 ### 3. bush--**(WIP)**:
-This project consist of a simplified version of a shell;
-
+This project consist of a simplified version of a shell, you can find more info in the related [README](bush_minus_minus-students/README);
+   - [shell.h](bush_minus_minus-students/shell.h): implement shell class's methods;
+   - [var_table.h](bush_minus_minus-students/var_table.h): implement variable table's class methods;
+   - [ast.h](bush_minus_minus-students/ast.h): implement shell's built-in and external command's node;
+   - [utils.h](bush_minus_minus-students/utils.h) and [str.h](bush_minus_minus-students/str.h) are auxiliar libraries;
 
 \* *actually accept() create a new socket on server (connected with client) while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
