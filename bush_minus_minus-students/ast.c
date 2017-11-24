@@ -289,9 +289,8 @@ char *find_in_path(const char *path, const char *name)
 	while(init) {
 		char *const delimiter = strchr(init, ':'); /* return delimiter position */
 		ptrdiff_t path_len;
-		if (!delimiter)
-			break;
-		path_len = delimiter - init; /* return path len before ':' */
+		if (!delimiter) path_len = strlen(init);
+		else path_len = delimiter - init; /* return path len before ':' */
 		tmp = (char *)my_malloc(sizeof(char)*(path_len +2+ strlen(name)));
 		strncpy(tmp, init, path_len);
 		strcpy(tmp+path_len, "/"); /* strncpy won't add \0 in certain cases */
@@ -301,9 +300,10 @@ char *find_in_path(const char *path, const char *name)
 		#endif
 		if(access(tmp, F_OK | X_OK)==0) return (char* const)tmp;
 		free(tmp);
-		init = init+path_len+1;
+		if(!delimiter) break;
+		else init = init+path_len+1;
 		#ifdef DEBUG
-		printf("now path is: \e[95m%s\e[0m\n", path);
+		printf("now path is: \e[95m%s\e[0m\n", init);
 		#endif
 	}
 
