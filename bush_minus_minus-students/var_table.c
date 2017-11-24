@@ -55,10 +55,10 @@ char **vt_to_envp(const struct var_table * const this) {
 	/* creare l'array con le variabili di ambiente, ricordarsi
 	 * di terminare l'array con NULL */
 /*** TO BE DONE START ***/
-    struct var *v = this->vars, *end = v+len;
+    struct var *v = this->vars; 
     char** environ=(char**)my_malloc(sizeof(char*)*(this->len+1)); /* dynamic multidimensional array init */
     char** index=environ; 
-  	for(;;v++, index++){
+  	for(size_t i=0;i<this->len;v++, index++, i++){
         *index=(char*)my_malloc(sizeof(char)*(strlen(v->name)+strlen(v->value)+2));
     	sprintf(*index, "%s=%s", v->name, v->value);
         #ifdef DEBUG
@@ -66,7 +66,7 @@ char **vt_to_envp(const struct var_table * const this) {
         #endif
     }
     /*aggiunge /0 alla fine dell'array*/
-    index=NULL;/*i uscita del ciclo è uguale ad vt->len*/
+    *index=NULL;/*i uscita del ciclo è uguale ad vt->len*/
     return environ;  /* maybe? */
 /*** TO BE DONE END ***/
 }
