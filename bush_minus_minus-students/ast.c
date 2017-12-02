@@ -85,18 +85,15 @@ enum next_action cd_execute(const struct node * const this, struct shell * const
 	 * - gestire il cambiamento della variabile PWD */
 
 /*** TO BE DONE START ***/
-	// setting path variab 	le:
-	const char* const pwd = vt_lookup(sh_get_var_table(sh), PWD);
-	char* new_path = NULL;
+	char* new_path;
 	if(impl->pathname==NULL) new_path=(char *const)vt_lookup(sh_get_var_table(sh), HOME);
-	else if(*impl->pathname=='/' || strcmp(impl->pathname, "..")==0) new_path = strdup(impl->pathname); /* complete path case */
-	else{
-		new_path = (char*)my_malloc((strlen(impl->pathname)+strlen(pwd)+2)*sizeof(char)); /* build a string long as pwd+/+dirname */
-		sprintf(new_path, "%s/%s", pwd, (char *const)impl->pathname);
-	} 
+	else new_path = impl->pathname;
 	if(chdir((const char*)new_path)<0) fprintf(stderr, "Cannot open %s: %s\n", impl->pathname ,strerror(errno));
-	else new_path = getcwd(NULL, 0); /* so I don't have to struggle in case of @cd ../.. */
-	vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */		
+	else{
+		new_path = getcwd(NULL, 0); /* so I don't have to struggle in case of @cd ../.. */
+		vt_set_value(sh_get_var_table(sh), PWD, new_path); /* set new pwd <=> has really changed */
+		free(new_path);
+	}
 /*** TO BE DONE END ***/
 
 	return NA_CONTINUE;
@@ -286,10 +283,10 @@ char *find_in_path(const char *path, const char *name)
 	if(strchr(name, '/')!=NULL) return strdup(name);
 	char* tmp;
 	char* init = (char *)path;
-	while(init) {
+	while(*init) {
 		char *const delimiter = strchr(init, ':'); /* return delimiter position */
 		ptrdiff_t path_len;
-		if (!delimiter) path_len = strlen(init);
+		if (!delimiter) path_len = strlen(init); /* the last path won't terminate with ':' */
 		else path_len = delimiter - init; /* return path len before ':' */
 		tmp = (char *)my_malloc(sizeof(char)*(path_len +2+ strlen(name)));
 		strncpy(tmp, init, path_len);
@@ -300,8 +297,7 @@ char *find_in_path(const char *path, const char *name)
 		#endif
 		if(access(tmp, F_OK | X_OK)==0) return (char* const)tmp;
 		free(tmp);
-		if(!delimiter) break;
-		else init = init+path_len+1;
+		init = init+path_len+1;
 		#ifdef DEBUG
 		printf("now path is: \e[95m%s\e[0m\n", init);
 		#endif
