@@ -75,11 +75,9 @@ void run_webserver(const char *const port_as_str, char *www_root, const int *con
 	 * //crea file descriptor che ascolta ecc.. e togliere provilegi di root a www_root
 	 *** listen_fd, and eventually drop root privileges ***/
 /*** TO BE DONE 2.2 START ***/
-	if(chroot(www_root)<0)
-		fail_errno("do not became the root directorty");
+	if(chroot(www_root)<0) fail_errno("Impossible to change root directory");
 	create_listening_socket(port_as_str);
-	
-
+	drop_privileges();
 /*** TO BE DONE 2.2 END ***/
 
 #ifdef INCaPACHE_2_3
@@ -111,7 +109,7 @@ void run_webserver(const char *const port_as_str, char *www_root, const int *con
 
 		/*** create PTHREAD number i, running client_connection_thread() ***/
 /*** TO BE DONE 2.2 START ***/
-
+		client_connection_thread(i);
 
 /*** TO BE DONE 2.2 END ***/
 
