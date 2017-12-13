@@ -34,7 +34,7 @@ This project is a bit more complicated, it consist of a tcp client, a udp client
    - [mkfile.bash](pingpong/scripts/mkfile.bash)(usage`mkfile.bash <min dimension> <max dimension for udp message> <max dimension for tcp message> <ripetitions>`) generates throughtput diagrams basing on message dimension for both udp and tcp client;
    - [banda_latenza_graph.bash](pingpong/scripts/banda_latenza_graph.bash) generates a .png file;
 
-### 3. bush--**(WIP)**:
+### 3. bush--:
 This project consist of a simplified version of a shell, you can find more info in the related [README](bush_minus_minus-students/README);
    - [shell.h](bush_minus_minus-students/shell.h): implement **shell** class's methods;
    - [var_table.h](bush_minus_minus-students/var_table.h): implement **variable table**'s class methods;
@@ -42,5 +42,8 @@ This project consist of a simplified version of a shell, you can find more info 
    - [utils.h](bush_minus_minus-students/utils.h) and [str.h](bush_minus_minus-students/str.h) are auxiliar libraries;
    - [lexer.l](bush_minus_minus-students/lexer.l): (flex input file)defines language's lexical rules;
    - [parser.y](bush_minus_minus-students/parser.y): (byson input file) defines language's grammar rules;
+
+### 4. incapache(**WIP**):
+   Implements the dumb version of an [Apache](https://httpd.apache.org/) server;
 
 \* *actually accept() create a new socket on server (connected with client) while original socket(the one used for negotiating connection), remains on **listening status** so that can be used for accept other connection requests on the same server's port*.
