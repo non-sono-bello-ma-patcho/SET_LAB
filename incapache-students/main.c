@@ -14,7 +14,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- */
+ */ 
 
 #include "incApache.h"
 
@@ -44,8 +44,8 @@ void create_listening_socket(const char *const port_as_str)
 
 void drop_privileges()
 {
-	uid_t uid = getuid();
-	assert(uid);
+	uid_t uid = getuid();//utente del processo chiamante
+	assert(uid);//se l'espressione è falsa termiba il processo
 	if (setuid(uid))
 		fail_errno("Cannot drop privileges");
 }
@@ -55,13 +55,13 @@ void run_file(const int *p_to_file, const int *p_from_file)
 	drop_privileges();
 	if (close(p_to_file[PIPE_WRITE_END]))
 		fail_errno("close p_to_file write-end");
-	if (dup2(p_to_file[PIPE_READ_END], STDIN_FILENO) == -1)
+	if (dup2(p_to_file[PIPE_READ_END], STDIN_FILENO) == -1)//se è ugiale a -1 non restituisce il file descriptor
 		fail_errno("dup2 stdin");
 	if (close(p_from_file[PIPE_READ_END]))
 		fail_errno("close p_from_file read-end");
 	if (dup2(p_from_file[PIPE_WRITE_END], STDOUT_FILENO) == -1)
 		fail_errno("dup2 stdout");
-	execlp("file", "file", "-n", "-b", "-i", "-f", "-", (char *) NULL);
+	execlp("file", "file", "-n", "-b", "-i", "-f", "-", (char *) NULL);// duplicano le azioni della shell nella ricerca di un file eseguibile se il nome file specificato non contiene un carattere barra (/)
 	fprintf(stderr, "Cannot exec \"file\"\n");
 	exit(-1);
 }
@@ -72,9 +72,13 @@ void run_webserver(const char *const port_as_str, char *www_root, const int *con
 	int i;
 
 	/*** perform chroot to www_root; then, create, bind, and listen to
+	 * //crea file descriptor che ascolta ecc.. e togliere provilegi di root a www_root
 	 *** listen_fd, and eventually drop root privileges ***/
 /*** TO BE DONE 2.2 START ***/
-
+	if(chroot(www_root)<0)
+		fail_errno("do not became the root directorty");
+	create_listening_socket(port_as_str);
+	
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -145,7 +149,7 @@ int main(int argc, char **argv)
 	const char *const default_port = "8000";
 	char *www_root;
 	pid_t pid;
-	signal(SIGPIPE, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);//sys call. in questo caso ignorato.
 #ifdef PRETEND_TO_BE_ROOT
 	fprintf(stderr, "\n\n\n*** Debug UNSAFE version - DO NOT DISTRIBUTE ***\n\n");
 #endif /* #ifdef PRETEND_TO_BE_ROOT */
@@ -154,15 +158,15 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Usage: %s <www-root> [<port-number>]\nDefault port: %s\n", *argv, default_port);
 		return EXIT_FAILURE;
 	}
-	port_as_str = argc == 3 ? argv[2] : default_port;
-	www_root = argv[1];
+	port_as_str = argc == 3 ? argv[2] : default_port;//se uguake a 3 allora argv2 altrimenti default.. se non c'è un terzo parametro ne assegna una di default 
+	www_root = argv[1];//pagina del sito
 	if (pipe(p_to_file))
 		fail_errno("Cannot create pipe to-file");
 	if (pipe(p_from_file))
 		fail_errno("Cannot create pipe from-file");
-	if (chdir(www_root))
+	if (chdir(www_root))//cambia directory lvoro
 		fail_errno("Cannot chdir to www-root directory");
-	www_root = getcwd(NULL, 0);
+	www_root = getcwd(NULL, 0);//dir corrente completa
 	if (!www_root)
 		fail_errno("Cannot get current directory");
 	pid = fork();
