@@ -70,6 +70,8 @@ void send_response(int client_fd, int response_code,
 	/*** Compute date of servicing current HTTP Request using a variant of gmtime() ***/
 /*** TO BE DONE 2.2 START ***/
 
+    now_tm=gmtime(&now_t);
+    if(now_tm==NULL){/*errore*/}
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -99,7 +101,8 @@ void send_response(int client_fd, int response_code,
 
 			/*** compute file_size and file_modification_time ***/
 /*** TO BE DONE 2.2 START ***/
-
+        file_size=stat_p->st_size;
+        file_modification_time=stat_p->st_mtim;
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -119,7 +122,14 @@ void send_response(int client_fd, int response_code,
 			/*** compute file_size, mime_type, and file_modification_time of HTML_404 ***/
 /*** TO BE DONE 2.2 START ***/
 
-
+            if (stat_p == NULL) /*copiato da sopra ... cambiare mess errore*/
+            {
+				stat_p = &stat_buffer;
+				if (stat(HTML_404, stat_p)){fail_errno("stat");}
+			}
+            mime_type = get_mime_type(HTML_404);
+            file_size=stat_p->st_size;
+            file_modification_time=stat_p->st_mtim;
 /*** TO BE DONE 2.2 END ***/
 
 		}
@@ -130,7 +140,14 @@ void send_response(int client_fd, int response_code,
 
 			/*** compute file_size, mime_type, and file_modification_time of HTML_501 ***/
 /*** TO BE DONE 2.2 START ***/
-
+            if (stat_p == NULL) /*copiato da sopra ... cambiare mess errore*/
+            {
+				stat_p = &stat_buffer;
+				if (stat(HTML_501, stat_p)){fail_errno("stat");}
+			}
+            mime_type = get_mime_type(HTML_501);
+            file_size=stat_p->st_size;
+            file_modification_time=stat_p->st_mtim;
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -151,6 +168,8 @@ void send_response(int client_fd, int response_code,
 		     see gmtime and strftime ***/
 /*** TO BE DONE 2.2 START ***/
 
+/*alla linea 78 non fa già questa operazione?*/
+        /*strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &now_tm);*/
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -182,6 +201,10 @@ void send_response(int client_fd, int response_code,
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
 
+    if(sendfile(client_fd,fd,NULL,stat_p->st_size)<0)/*dal manuale:Note that a  successful
+       call to sendfile() may write fewer bytes than requested; the caller should be prepared to retry the call if
+       there were unsent bytes.   Devo fare un controllo aggiuntivo quindi?*/
+    {/*errore*/}
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -236,17 +259,26 @@ void manage_http_requests(int client_fd
 		/*** parse first line defining the 3 strings method_str,
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
-
-
+        method_str=http_request_line;
+        strtokr_save=strtok(http_request_line," ");
+        file_name=strtokr_save;
+        strtokr_save=strtok(NULL," ");
+        protocol=strtokr_save;
+        
+        
+        /*gestione garbage*/
+        strtokr_save=strtok(NULL," ");
+        if(strtokr_save!=NULL){/*errore*/}
+    /*se c'è del garbage dopo cosa faccio?ignoro o segnalo errore?*/
 /*** TO BE DONE 2.2 END ***/
 
 		debug("   ... method_str=%s, filename=%s (0=%c), protocol=%s (len=%d)\n",
 		      method_str, filename, filename ? filename[0] : '?', protocol, (int)(protocol ? strlen(protocol) : 0));
-		if (method_str == NULL || filename == NULL || protocol == NULL ||
+		if (method_str == NULL || filename == NULL || protocol == NULL ||/*controlla i parametri acquisiti*/
 		    filename[0] != '/' || strncmp(protocol, "HTTP/1.", 7) != 0 ||
 		    strlen(protocol) != 8) {
 			debug("       ... Bad Request!\n");
-			SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST,
+			SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST,/*risp con bad req*/
 #ifdef INCaPACHE_2_3
 				      1, connection_no, thread_idx,
 #endif
@@ -258,7 +290,7 @@ void manage_http_requests(int client_fd
 		is_http1_0 = !strcmp(protocol, "HTTP/1.0");
 #endif
 		memset(&since_tm, 0, sizeof(since_tm));
-		http_method = METHOD_NONE;
+		http_method = METHOD_NONE;/*setta il metodo default e succ ne cerca uno specifico*/
 		if (strcmp(method_str, "GET") == 0)
 			http_method = METHOD_GET;
 		else if (strcmp(method_str, "HEAD") == 0)
@@ -275,8 +307,24 @@ void manage_http_requests(int client_fd
 				 *** (and set since_tm by using strptime)
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-
-
+                  strtokr_save=strtok(http_request_line,":");
+                 if(strcmp(http_request_line,"If-Modified-Since")==0)
+                  {
+                        http_method=METHOD_CONDITIONAL;
+                        /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
+                        
+                        /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
+                        
+                        if(!strptime(strtokr_save,"%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+                        {
+                            /*messaggio di errore*/
+                        }
+                        /*se c'è del garbage dopo cosa facc?*/
+                  }
+                  else{/*?BAD REQUEST?*/}
+                 
+                  
+               
 /*** TO BE DONE 2.2 END ***/
 
 			}
@@ -314,8 +362,11 @@ void manage_http_requests(int client_fd
 				 *** Use timegm() to convert from struct tm to time_t
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-
-
+             /*time gm non considera più le var sotto  i secondi*/
+             if(timegm(&tm)<(stat_p->tv_sec))
+             {http_method=METHOD_GET;}
+             else{http_method=METHOD_NOT_CHANGED;}
+            
 /*** TO BE DONE 2.2 END ***/
 
 			}
