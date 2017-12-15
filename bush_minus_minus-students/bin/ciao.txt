@@ -1,0 +1,4 @@
+total 188
+drwxrwxr-x 2 strafo strafo   4096 Nov 22 09:47 abc
+-rwxrwxr-x 1 strafo strafo 168784 Nov 22 09:40 bmm
+-rw------- 1 strafo strafo      0 Nov 22 10:06 ciao.txt
