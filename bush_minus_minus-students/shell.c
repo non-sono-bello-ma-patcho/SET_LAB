@@ -43,7 +43,7 @@ static void free_envp(char **envp)
     for(;*index;index++)
     {
         #ifdef DEBUG
-        printf("libero la memoria della variabile:%s;\n",*v);
+        printf("libero la memoria della variabile:%s;\n",*index);
         #endif
        	free(*index);
     }
