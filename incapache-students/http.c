@@ -69,10 +69,7 @@ void send_response(int client_fd, int response_code,
 
 	/*** Compute date of servicing current HTTP Request using a variant of gmtime() ***/
 /*** TO BE DONE 2.2 START ***/
-
-    now_tm=gmtime(&now_t);
-    if(now_tm==NULL){/*errore*/}
-
+    if(gmtime_r(&now_t, &now_tm)==NULL)fail_errno("Couldn't convert data");
 /*** TO BE DONE 2.2 END ***/
 
 	strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &now_tm);
@@ -103,7 +100,7 @@ void send_response(int client_fd, int response_code,
 /*** TO BE DONE 2.2 START ***/
         file_size=stat_p->st_size;
         file_modification_time=stat_p->st_mtim;
-
+        if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
 			debug("      ... send_response(%3d,%s) : file opened, size=%lu, mime=%s\n", response_code, filename, (unsigned long)file_size, mime_type);
@@ -121,7 +118,6 @@ void send_response(int client_fd, int response_code,
 
 			/*** compute file_size, mime_type, and file_modification_time of HTML_404 ***/
 /*** TO BE DONE 2.2 START ***/
-
             if (stat_p == NULL) /*copiato da sopra ... cambiare mess errore*/
             {
 				stat_p = &stat_buffer;
@@ -130,6 +126,7 @@ void send_response(int client_fd, int response_code,
             mime_type = get_mime_type(HTML_404);
             file_size=stat_p->st_size;
             file_modification_time=stat_p->st_mtim;
+            if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
 		}
@@ -148,7 +145,7 @@ void send_response(int client_fd, int response_code,
             mime_type = get_mime_type(HTML_501);
             file_size=stat_p->st_size;
             file_modification_time=stat_p->st_mtim;
-
+            if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
 		}
@@ -168,9 +165,8 @@ void send_response(int client_fd, int response_code,
 		     see gmtime and strftime ***/
 /*** TO BE DONE 2.2 START ***/
 
-/*alla linea 78 non fa già questa operazione?*/
-        /*strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &now_tm);*/
-
+/*alla linea 78 non fa già questa operazione? Quello alla linea 78 è la data di richiesta*/
+        strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &file_modification_tm);
 /*** TO BE DONE 2.2 END ***/
 
 		strcat(http_header, time_as_string);
@@ -363,7 +359,7 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&tm)<(stat_p->tv_sec))
+             if(timegm(&now_tm)<(stat_p->tv_sec))
              {http_method=METHOD_GET;}
              else{http_method=METHOD_NOT_CHANGED;}
             
