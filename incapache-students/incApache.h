@@ -19,6 +19,8 @@
 #ifndef incApache_h
 #define incApache_h
 
+#define DEBUG
+
 #ifdef DEBUG
 #define debug(...) printf(__VA_ARGS__)
 #else
