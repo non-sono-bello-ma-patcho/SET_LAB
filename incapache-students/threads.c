@@ -191,7 +191,7 @@ char *get_mime_type(char *filename)
 
 	/*** What is missing here to avoid race conditions ? ***/
 /*** TO BE DONE 2.2 START ***/
-	pthread_mutex_lock(&threads_mutex);
+	pthread_mutex_lock(&mime_mutex);
 
 /*** TO BE DONE 2.2 END ***/
 
@@ -203,7 +203,7 @@ char *get_mime_type(char *filename)
 
 	/*** What is missing here to avoid race conditions ? ***/
 /*** TO BE DONE 2.2 START ***/
-	pthread_mutex_unlock(&threads_mutex);
+	pthread_mutex_unlock(&mime_mutex);
 
 /*** TO BE DONE 2.2 END ***/
 
