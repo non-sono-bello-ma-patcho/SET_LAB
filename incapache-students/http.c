@@ -257,7 +257,7 @@ void manage_http_requests(int client_fd
 /*** TO BE DONE 2.2 START ***/
         method_str=http_request_line;
         strtokr_save=strtok(http_request_line," ");
-        file_name=strtokr_save;
+        filename=strtokr_save;
         strtokr_save=strtok(NULL," ");
         protocol=strtokr_save;
         
@@ -359,7 +359,7 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&now_t)<(stat_p->st_mtim.tv_sec))
+             if(timegm(&since_tm)<(stat_p->st_mtim.tv_sec))
              {http_method=METHOD_GET;}
              else{http_method=METHOD_NOT_CHANGED;}
             
