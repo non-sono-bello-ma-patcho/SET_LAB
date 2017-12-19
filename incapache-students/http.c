@@ -255,16 +255,17 @@ void manage_http_requests(int client_fd
 		/*** parse first line defining the 3 strings method_str,
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
-        method_str=http_request_line;
-        strtokr_save=strtok(http_request_line," ");
-        filename=strtokr_save;
-        strtokr_save=strtok(NULL," ");
-        protocol=strtokr_save;
-        
-        
+        char* pos=http_request_line;
+        char* blankpos = strchr(http_request_line, ' ');
+        method_str = strndup(pos, blankpos-pos);
+        pos=blankpos+1;	
+        blankpos = strchr(pos, ' ');
+        filename=strndup(pos,blankpos-pos);
+        pos=blankpos+1;
+        blankpos = strchr(pos, '\n');
+        protocol=strndup(pos, 8);
+        if(protocol[strlen(protocol)-1]=='\n') protocol[strlen(protocol)-1]='\0';
         /*gestione garbage*/
-        strtokr_save=strtok(NULL," ");
-        if(strtokr_save!=NULL){/*errore*/}
     /*se c'è del garbage dopo cosa faccio?ignoro o segnalo errore?*/
 /*** TO BE DONE 2.2 END ***/
 
@@ -404,7 +405,7 @@ void manage_http_requests(int client_fd
 	}
 #ifdef INCaPACHE_2_3
 	join_all_threads(connection_no);
-#endif
+#endif	
 	if (close(client_fd))
 		fail_errno("Cannot close the connection");
 }
