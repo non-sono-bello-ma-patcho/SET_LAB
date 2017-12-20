@@ -50,15 +50,15 @@ int find_unused_thread_idx(int conn_no)
 	int idx = -1;
 	pthread_mutex_lock(&threads_mutex);
 	if (no_response_threads[conn_no] > 0) { /* reserved thread already used, try to find another (unused) one */
-		if (no_free_threads > 0) {
-			--no_free_threads;
-			++no_response_threads[conn_no];
-			idx = reserve_unused_thread();
+		if (no_free_threads > 0) { /* se esistono slot liberi*/
+			--no_free_threads; /* decremento numero slot liberi*/
+			++no_response_threads[conn_no]; /* alla conessione corrente aggiungo un thread di risposta */
+			idx = reserve_unused_thread(); /* calcolo l'id del nuovo thread */
 			pthread_mutex_unlock(&threads_mutex);
-			return idx;
-		}
+			return idx; /* restituisco l'id */
+		} /* senza slot liberi */
 		pthread_mutex_unlock(&threads_mutex);
-		join_all_threads(conn_no);
+		join_all_threads(conn_no); /* eseguo tutti i thread relativi alla connessione (?) */
 		pthread_mutex_lock(&threads_mutex);
 	}
 	assert(no_response_threads[conn_no] == 0);
@@ -77,13 +77,13 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-	for(i=0; i<MAX_THREADS; i++){
+	for(i=0; i<no_response_threads[conn_no]; i++){
 		if(pthread_join(thread_ids[i], NULL)<0) fail_errno("couldn't join");
 		else{
 			/*Variables update*/
 			++no_free_threads; /*latest joined thread as expired?...*/
 			--no_response_threads[conn_no];
-			connection_no[i]=0; /*if thread has expired he no longer has connections(?)*/
+			connection_no[i]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
 		}
 	}
 /*** TO BE DONE 2.3 END ***/
@@ -104,9 +104,8 @@ void join_prev_thread(int thrd_no)
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/
 	conn_no = connection_no[thrd_no];
-	if(to_join[thrd_no]){
+	if(!to_join[thrd_no]){
 		/*compute index i:(how?)*/
-
 	} 
 
 /*** TO BE DONE 2.3 END ***/

@@ -196,12 +196,11 @@ void send_response(int client_fd, int response_code,
 
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
-
-    if(sendfile(client_fd,fd,NULL,stat_p->st_size)<0)/*dal manuale:Note that a  successful
+    size_t offset=0, sent_bytes;
+    for(;(offset+(sent_bytes=sendfile(client_fd,fd,NULL,stat_p->st_size))) < stat_p->st_size;offset+=sent_bytes) if(sent_bytes<0) fail_errno("couldn't send data");
+    /*if(sendfile(client_fd,fd,NULL,stat_p->st_size)<0)fail_errno("couldn't send file");dal manuale:Note that a  successful
        call to sendfile() may write fewer bytes than requested; the caller should be prepared to retry the call if
        there were unsent bytes.   Devo fare un controllo aggiuntivo quindi?*/
-    {/*errore*/}
-
 /*** TO BE DONE 2.2 END ***/
 
 	}
@@ -255,10 +254,11 @@ void manage_http_requests(int client_fd
 		/*** parse first line defining the 3 strings method_str,
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
+		/* aggiungere gestione richieste COMPLETAMENTE ERRATE*/
         char* pos=http_request_line;
         char* blankpos = strchr(http_request_line, ' ');
         method_str = strndup(pos, blankpos-pos);
-        pos=blankpos+1;	
+        pos=blankpos+1;
         blankpos = strchr(pos, ' ');
         filename=strndup(pos,blankpos-pos);
         pos=blankpos+1;
@@ -304,7 +304,7 @@ void manage_http_requests(int client_fd
 				 *** (and set since_tm by using strptime)
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-                  strtokr_save=strtok(http_request_line,":");
+                 strtokr_save=strtok(http_request_line,":");
                  if(strcmp(http_request_line,"If-Modified-Since")==0)
                   {
                         http_method=METHOD_CONDITIONAL;
@@ -360,9 +360,8 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&since_tm)<(stat_p->st_mtime))
-             {http_method=METHOD_GET;}
-             else{http_method=METHOD_NOT_CHANGED;}
+             if(timegm(&since_tm)<(stat_p->st_mtime)) http_method=METHOD_GET;
+             else http_method=METHOD_NOT_CHANGED;
             
 /*** TO BE DONE 2.2 END ***/
 
