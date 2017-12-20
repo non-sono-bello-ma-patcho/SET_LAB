@@ -99,7 +99,7 @@ void send_response(int client_fd, int response_code,
 			/*** compute file_size and file_modification_time ***/
 /*** TO BE DONE 2.2 START ***/
         file_size=stat_p->st_size;
-        file_modification_time=stat_p->st_mtim.tv_sec;
+        file_modification_time=stat_p->st_mtime;
         if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
@@ -125,7 +125,7 @@ void send_response(int client_fd, int response_code,
 			}
             mime_type = get_mime_type(HTML_404);
             file_size=stat_p->st_size;
-            file_modification_time=stat_p->st_mtim.tv_sec;
+            file_modification_time=stat_p->st_mtime;
             if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
@@ -144,7 +144,7 @@ void send_response(int client_fd, int response_code,
 			}
             mime_type = get_mime_type(HTML_501);
             file_size=stat_p->st_size;
-            file_modification_time=stat_p->st_mtim.tv_sec;
+            file_modification_time=stat_p->st_mtime;
             if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
@@ -360,7 +360,7 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&since_tm)<(stat_p->st_mtim.tv_sec))
+             if(timegm(&since_tm)<(stat_p->st_mtime))
              {http_method=METHOD_GET;}
              else{http_method=METHOD_NOT_CHANGED;}
             
