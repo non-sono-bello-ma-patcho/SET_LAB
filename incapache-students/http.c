@@ -165,7 +165,7 @@ void send_response(int client_fd, int response_code,
 		     see gmtime and strftime ***/
 /*** TO BE DONE 2.2 START ***/
 
-/*alla linea 78 non fa già questa operazione? Quello alla linea 78 è la data di richiesta*/
+/*alla linea 78 non fa già questa operazione?-> Quello alla linea 78 è la data di richiesta non di modifica*/
         strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &file_modification_tm);
 /*** TO BE DONE 2.2 END ***/
 
@@ -196,6 +196,10 @@ void send_response(int client_fd, int response_code,
 
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
+
+/*-> molto meglio ripetere l'operazione sovrascrivedno la merda che siè scritto precedente , riprovare fino a un tot di ttl oppure failare easy peasy*/
+
+
     size_t offset=0, sent_bytes;
     for(;(offset+(sent_bytes=sendfile(client_fd,fd,NULL,stat_p->st_size))) < stat_p->st_size;offset+=sent_bytes) if(sent_bytes<0) fail_errno("couldn't send data");
     /*if(sendfile(client_fd,fd,NULL,stat_p->st_size)<0)fail_errno("couldn't send file");dal manuale:Note that a  successful
