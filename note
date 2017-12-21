@@ -1,0 +1,15 @@
+reserved_unused_thread() non viene usata in http.c
+join_all_threads() viene usata in http alla linea 406
+join_prev_thread() viene usata in h alla linea 180
+response_thread() nessuna corrisp
+client_connection_thread() viene utilizzata nel main alla linea 112
+SEND_RESPONSE è alias di send_resp_thread() e viene utilizzato per ogni tipo di richiesta http
+
+
+
+in find_unused_thread_idx se no_response_threads[conn_no] ==0 implica che stiamo creando il primo thread di risposta
+
+
+la send_response() (hiamata da response_thread() chiamato dal main()) che è un thread in ascolto(quindi id<=7) dopo aver fatto i suoi vari calcoli sulle stringhe ecc  chiama la join_prev...
+
+nella join_prev sfrutto la struttura to_join per sapere se devo joinare
