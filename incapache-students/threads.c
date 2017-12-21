@@ -77,14 +77,20 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-	i=MAX_CONNECTIONS+conn_no;
-	for(i=0;i<no_response_threads[conn_no];i++){
-		if(pthread_join(thread_ids[(i*MAX_CONNECTIONS)+conn_no], NULL)<0) fail_errno("couldn't join");
-		else{
-			++no_free_threads; /*latest joined thread as expired?...*/
-			--no_response_threads[conn_no];
-			connection_no[conn_no]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
+	i=no_response_threads[conn_no];
+	while(i>0)
+	{
+	    /*non mi è chiara i*MAX_CONNECTIONS)+conn_no numerosi dubbi che sia giusta*/
+		if(pthread_join(thread_ids[(i*MAX_CONNECTIONS)+conn_no], NULL)!=0) fail_errno("ERROR thread join_all");
+		else
+		{
+		    pthread_mutex_lock(&threads_mutex);
+			    no_free_threads++; /*latest joined thread as expired?...*/
+			    no_response_threads[conn_no]--;
+			    connection_no[i]=FREE_SLOT;
+			pthread_mutex_unlock(&threads_mutex);
 		}
+	    i--;
 	}
 /*** TO BE DONE 2.3 END ***/
 
@@ -102,10 +108,30 @@ void join_prev_thread(int thrd_no)
 	 *** wait for its termination, and update the shared variables
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
-/*** TO BE DONE 2.3 START ***/
-	pthread_mutex_lock(&threads_mutex);
-	if(to_join[thrd_no])
-	pthread_mutex_unlock(&threads_mutex);
+/*** TO BE DONE 2.3 START ***/         
+	conn_no=connection_no[thrd_no];
+	if(no_response_threads[conn_no]>1)/*ci sono altri thread*/
+	{
+        for(i=thrd_no-1;i>=MAX_CONNECTION;i--)
+        {
+            pthread_mutex_lock(&threads_mutex);
+                if(connection_no[i]=conn_no)
+                {
+			       connection_no[i]=FREE_SLOT; 
+			       break;
+                }
+            pthread_mutex_unlock(&threads_mutex);
+        }
+    }
+    
+	    if(pthread_join(thread_ids[i],NULL)!=0){fail_errno("ERROR thread join_all");}
+	    else
+	    {
+	        pthread_mutex_lock(&threads_mutex);
+			    no_free_threads++; /*latest joined thread as expired?...*/
+			    no_response_threads[conn_no]--;
+			pthread_mutex_unlock(&threads_mutex);
+	    }
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -148,6 +174,9 @@ void *client_connection_thread(void *vp)
 
 	/*** properly initialize the thread queue to_join ***/
 /*** TO BE DONE 2.3 START ***/
+	
+	
+	
 	
 /*** TO BE DONE 2.3 END ***/
 
@@ -232,10 +261,11 @@ void send_resp_thread(int out_socket, int response_code,
 
 /*** TO BE DONE 2.3 END ***/
 
-	if (pthread_create(thread_ids + new_thread_idx, NULL, response_thread, connection_no + new_thread_idx))
+	if (pthread_create(thread_ids + new_thread_idx, NULL, response_thread, connection_no + new_thread_idx))//    ,fa partire la routine puntata da response_thread ,
 		fail_errno("Could not create response thread");
 	pthread_mutex_unlock(&threads_mutex);
 	debug(" ... send_resp_thread(): new thread created\n");
 }
 
 #endif
+
