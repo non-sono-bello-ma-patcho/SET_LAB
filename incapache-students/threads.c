@@ -77,14 +77,12 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-	for(i=0; i<no_response_threads[conn_no]; i++){
-		if(pthread_join(thread_ids[i], NULL)<0) fail_errno("couldn't join");
-		else{
-			/*Variables update*/
-			++no_free_threads; /*latest joined thread as expired?...*/
-			--no_response_threads[conn_no];
-			connection_no[i]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
-		}
+	i=MAX_CONNECTIONS+conn_no;
+	if(pthread_join(thread_ids[i], NULL)<0) fail_errno("couldn't join");
+	else{
+		++no_free_threads; /*latest joined thread as expired?...*/
+		--no_response_threads[conn_no];
+		connection_no[conn_no]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
 	}
 /*** TO BE DONE 2.3 END ***/
 
@@ -103,11 +101,9 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/
-	conn_no = connection_no[thrd_no];
-	if(!to_join[thrd_no]){
-		/*compute index i:(how?)*/
-	} 
-
+	pthread_mutex_lock(&threads_mutex);
+	if(to_join[thrd_no])
+	pthread_mutex_unlock(&threads_mutex);
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -150,8 +146,7 @@ void *client_connection_thread(void *vp)
 
 	/*** properly initialize the thread queue to_join ***/
 /*** TO BE DONE 2.3 START ***/
-
-
+	
 /*** TO BE DONE 2.3 END ***/
 
 	pthread_mutex_unlock(&threads_mutex);
