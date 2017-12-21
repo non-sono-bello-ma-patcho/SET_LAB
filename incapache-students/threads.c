@@ -72,17 +72,19 @@ void join_all_threads(int conn_no)
 {
 	size_t i;
 
-	/*** compute the index i of the thread to join,
+	/*** compute the index i of the thread to join,l
 	 *** call pthread_join() on thread_ids[i], and update shared variables
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
 	i=MAX_CONNECTIONS+conn_no;
-	if(pthread_join(thread_ids[i], NULL)<0) fail_errno("couldn't join");
-	else{
-		++no_free_threads; /*latest joined thread as expired?...*/
-		--no_response_threads[conn_no];
-		connection_no[conn_no]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
+	for(i=0;i<no_response_threads[conn_no];i++){
+		if(pthread_join(thread_ids[(i*MAX_CONNECTIONS)+conn_no], NULL)<0) fail_errno("couldn't join");
+		else{
+			++no_free_threads; /*latest joined thread as expired?...*/
+			--no_response_threads[conn_no];
+			connection_no[conn_no]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
+		}
 	}
 /*** TO BE DONE 2.3 END ***/
 
