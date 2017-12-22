@@ -110,8 +110,14 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/   
-    conn_no=connection_no[thrd_no];
-    
+    if(!*to_join[thrd_no]) return; /* no prev thread*/
+    pthread_join( *(to_join[thrd_no]),NULL);		
+	pthread_mutex_lock( &threads_mutex );
+	no_free_threads++;
+	 
+	connection_no[to_join[thrd_no]-thread_id]=-1;			
+	pthread_mutex_unlock( &my_threads_mutex );
+	(no_threads[thrd_no])--; 
 /*** TO BE DONE 2.3 END ***/
 
 }
