@@ -308,24 +308,27 @@ void manage_http_requests(int client_fd
 				 *** (and set since_tm by using strptime)
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-                 strtokr_save=strtok(http_request_line,":");
-                 if(strcmp(http_request_line,"If-Modified-Since")==0)
-                  {
-                        http_method=METHOD_CONDITIONAL;
-                        /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
-                        
-                        /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
-                        
-                        if(!strptime(strtokr_save,"%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
-                        {
-                            /*messaggio di errore*/
-                        }
-                        /*se c'è del garbage dopo cosa facc?*/
-                  }
-                  else{/*?BAD REQUEST?*/}
-                 
-                  
-               
+                strtokr_save=strtok(http_option_line,":");
+                if(!strtokr_save && strcmp(http_option_line,"If-Modified-Since")==0){
+               		strtokr_save = strtok(NULL, '\n');
+               	    http_method=METHOD_CONDITIONAL;
+               	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
+               	    /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
+               	    if(!strptime(strtokr_save,"%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+               	    	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
+#ifdef INCaPACHE_2_3
+				      	1, connection_no, thread_idx,
+#endif
+				      	NULL, NULL);
+			break; 
+                }
+                else
+                	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
+#ifdef INCaPACHE_2_3
+				    1, connection_no, thread_idx,
+#endif
+				    NULL, NULL);
+			break; 
 /*** TO BE DONE 2.2 END ***/
 
 			}
