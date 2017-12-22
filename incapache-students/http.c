@@ -198,13 +198,8 @@ void send_response(int client_fd, int response_code,
 /*** TO BE DONE 2.2 START ***/
 
 /*-> molto meglio ripetere l'operazione sovrascrivedno la merda che siè scritto precedente , riprovare fino a un tot di ttl oppure failare easy peasy*/
-
-
-    size_t offset=0, sent_bytes;
-    for(;(offset+(sent_bytes=sendfile(client_fd,fd,NULL,stat_p->st_size))) < stat_p->st_size;offset+=sent_bytes) if(sent_bytes<0) fail_errno("couldn't send data");
-    /*if(sendfile(client_fd,fd,NULL,stat_p->st_size)<0)fail_errno("couldn't send file");dal manuale:Note that a  successful
-       call to sendfile() may write fewer bytes than requested; the caller should be prepared to retry the call if
-       there were unsent bytes.   Devo fare un controllo aggiuntivo quindi?*/
+	file_size=0;
+	while(file_size<stat_p->st_size) if(sendfile(client_fd,fd,&file_size,stat_p->st_size)) fail_errno("couldn't send data");
 /*** TO BE DONE 2.2 END ***/
 
 	}
