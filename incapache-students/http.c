@@ -262,10 +262,10 @@ void manage_http_requests(int client_fd
 		strtokr_save = strtok(http_request_line, ' ');
         if(!strtokr_save){
         	method_str = strtokr_save;
-        	strtok(NULL, ' ');
+        	strtokr_save = strtok(NULL, ' ');
         	if(!strtokr_save){
         		filename = strtokr_save;
-        		strtok(NULL, '\n');
+        		strtokr_save = strtok(NULL, '\n');
         		if(!strtokr_save){
         			protocol = strtokr_save;
         		}
