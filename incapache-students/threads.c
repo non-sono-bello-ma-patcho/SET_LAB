@@ -78,19 +78,21 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-	for(i=MAX_THREADS;i>=MAX_CONNECTIONS;i--)
+
+	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS;i--)
 	{
-	    if(
-		if(pthread_join(thread_ids[], NULL)!=0)
-		{fail_errno("ERROR thread join_all");}
-		else
-		{
-		    pthread_mutex_lock(&threads_mutex);
+	    if(to_join[i]==thread_ids[conn_no])
+	    {
+		    if(pthread_join(thread_ids[i], NULL)!=0)
+		    {fail_errno("ERROR thread join_all");}
+		    else
+		    {
+		        pthread_mutex_lock(&threads_mutex);
 			    no_free_threads++; /*latest joined thread as expired?...*/
 			    no_response_threads[conn_no]--;
 			    connection_no[i]=FREE_SLOT;
-			pthread_mutex_unlock(&threads_mutex);
-		}
+			    pthread_mutex_unlock(&threads_mutex);
+		    }
 	}
 /*** TO BE DONE 2.3 END ***/
 
@@ -109,9 +111,20 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/   
-    if(to_join[thrd_no]!=NULL)
+    if(thrd_no<0)
     {
-            
+        fail_errno("ERROR thread join_all");
+    }
+    conn_no=to_join[thrd_no]-thread_ids[0];
+    if(connection_no[conn_no]>1)
+    {
+        if(pthread_join(, NULL)!=0)
+		{fail_errno("ERROR thread join_all");}
+    
+    
+    
+    
+    }      
         
         
             pthread_mutex_lock(&threads_mutex);
@@ -119,10 +132,6 @@ void join_prev_thread(int thrd_no)
 			    no_response_threads[conn_no]--;
 			    connection_no[i]=FREE_SLOT;
 			pthread_mutex_unlock(&threads_mutex);
-        
-        
-        
-    }
 /*** TO BE DONE 2.3 END ***/
 
 }
