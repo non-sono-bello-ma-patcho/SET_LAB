@@ -26,7 +26,7 @@ int client_sockets[MAX_CONNECTIONS]; /* for each connection, its socket FD */
 int no_response_threads[MAX_CONNECTIONS]; /* for each connection, how many response threads */
 
 pthread_t thread_ids[MAX_THREADS];
-int connection_no[MAX_THREADS]; /* connection_no[i] puè essere FREE_SLOT O RESERVED*/
+int connection_no[MAX_THREADS]; /* connection_no[i] >= 0 means that i-th thread belongs to connection connection_no[i] */
 pthread_t *to_join[MAX_THREADS]; /* for each thread, the pointer to the previous (response) thread, if any */
 
 int no_free_threads = MAX_THREADS - 2 * MAX_CONNECTIONS; /* each connection has one thread listening and one reserved for replies */
@@ -78,22 +78,21 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-
-	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS;i--)
+    pthread_mutex_lock(&threads_mutex);
+	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS&&no_response_thread[conn_no]>1;i--)
 	{
-	    if(to_join[i]==thread_ids[conn_no])
+	    if(connection_no[i]==conn_no)
 	    {
 		    if(pthread_join(thread_ids[i], NULL)!=0)
 		    {fail_errno("ERROR thread join_all");}
 		    else
 		    {
-		        pthread_mutex_lock(&threads_mutex);
 			    no_free_threads++; /*latest joined thread as expired?...*/
 			    no_response_threads[conn_no]--;
 			    connection_no[i]=FREE_SLOT;
-			    pthread_mutex_unlock(&threads_mutex);
 		    }
 	}
+	pthread_mutex_lock(&threads_mutex);
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -111,27 +110,8 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/   
-    if(thrd_no<0)
-    {
-        fail_errno("ERROR thread join_all");
-    }
-    conn_no=to_join[thrd_no]-thread_ids[0];
-    if(connection_no[conn_no]>1)
-    {
-        if(pthread_join(, NULL)!=0)
-		{fail_errno("ERROR thread join_all");}
+    conn_no=connection_no[thrd_no];
     
-    
-    
-    
-    }      
-        
-        
-            pthread_mutex_lock(&threads_mutex);
-			    no_free_threads++; /*latest joined thread as expired?...*/
-			    no_response_threads[conn_no]--;
-			    connection_no[i]=FREE_SLOT;
-			pthread_mutex_unlock(&threads_mutex);
 /*** TO BE DONE 2.3 END ***/
 
 }
