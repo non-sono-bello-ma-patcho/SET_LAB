@@ -259,18 +259,18 @@ void manage_http_requests(int client_fd
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
 		/* aggiungere gestione richieste COMPLETAMENTE ERRATE*/
-        char* pos=http_request_line;
-        char* blankpos = strchr(http_request_line, ' ');
-        method_str = strndup(pos, blankpos-pos);
-        pos=blankpos+1;
-        blankpos = strchr(pos, ' ');
-        filename=strndup(pos,blankpos-pos);
-        pos=blankpos+1;
-        blankpos = strchr(pos, '\n');
-        protocol=strndup(pos, 8);
-        if(protocol[strlen(protocol)-1]=='\n') protocol[strlen(protocol)-1]='\0';
-        /*gestione garbage*/
-    /*se c'è del garbage dopo cosa faccio?ignoro o segnalo errore?*/
+		strtokr_save = strtok(http_request_line, ' ');
+        if(!strtokr_save){
+        	method_str = strtokr_save;
+        	strtok(NULL, ' ');
+        	if(!strtokr_save){
+        		filename = strtokr_save;
+        		strtok(NULL, '\n');
+        		if(!strtokr_save){
+        			protocol = strtokr_save;
+        		}
+        	}
+        }
 /*** TO BE DONE 2.2 END ***/
 
 		debug("   ... method_str=%s, filename=%s (0=%c), protocol=%s (len=%d)\n",
