@@ -76,11 +76,8 @@ void run_webserver(const char *const port_as_str, char *www_root, const int *con
 	 *** listen_fd, and eventually drop root privileges ***/
 /*** TO BE DONE 2.2 START ***/
 	if(chroot(www_root)<0){fail_errno("Cannot cahnge root directory");}
-	drop_privileges();
-	for(i=0;i<MAX_CONNECTIONS;i++)
-	{
-	    create_listening_socket(port_as_str);
-    }
+	create_listening_socket(port_as_str);
+    drop_privileges();
 /*** TO BE DONE 2.2 END ***/
 
 #ifdef INCaPACHE_2_3
