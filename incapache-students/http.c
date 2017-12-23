@@ -254,16 +254,14 @@ void manage_http_requests(int client_fd
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
 		/* aggiungere gestione richieste COMPLETAMENTE ERRATE*/
-		strtokr_save = strtok(http_request_line, ' ');
-        if(!strtokr_save){
-        	method_str = strtokr_save;
-        	strtokr_save = strtok(NULL, ' ');
-        	if(!strtokr_save){
-        		filename = strtokr_save;
-        		strtokr_save = strtok(NULL, '\n');
-        		if(!strtokr_save){
-        			protocol = strtokr_save;
-        		}
+		method_str = NULL;
+		filename = NULL;
+		protocol = NULL;
+		method_str = strtok_r(http_request_line, " ", &strtokr_save);
+        if(method_str){
+        	filename = strtok_r(NULL, " ", strtokr_save);
+        	if(filename){
+        		protocol = strtok_r(NULL, "\n\r", strtokr_save);
         	}
         }
 /*** TO BE DONE 2.2 END ***/
@@ -303,27 +301,30 @@ void manage_http_requests(int client_fd
 				 *** (and set since_tm by using strptime)
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-                strtokr_save=strtok(http_option_line,":");
-                if(!strtokr_save && strcmp(http_option_line,"If-Modified-Since")==0){
-               		strtokr_save = strtok(NULL, '\n');
+				option_name = strtok_r(http_option_line,": ", strtokr_save);
+                if(option_name && strcmp(http_option_line,"If-Modified-Since")==0){
+               		option_value = strtok_r(NULL, "\n", strtokr_save);
                	    http_method=METHOD_CONDITIONAL;
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
                	    /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
-               	    if(!strptime(strtokr_save,"%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+               	    if(!strptime(option_value, "%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+               	    {
                	    	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
-#ifdef INCaPACHE_2_3
+						#ifdef INCaPACHE_2_3
 				      	1, connection_no, thread_idx,
-#endif
+						#endif
 				      	NULL, NULL);
-			break; 
-                }
-                else
+						break;
+               		}
+               	}
+                else{
                 	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
-#ifdef INCaPACHE_2_3
+					#ifdef INCaPACHE_2_3
 				    1, connection_no, thread_idx,
-#endif
+					#endif
 				    NULL, NULL);
-			break; 
+					break;
+				}
 /*** TO BE DONE 2.2 END ***/
 
 			}
