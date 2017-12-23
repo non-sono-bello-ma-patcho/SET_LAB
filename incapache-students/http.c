@@ -302,31 +302,32 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
 				option_name = strtok_r(http_option_line,":", &strtokr_save);
-                if(option_name && strcmp(http_option_line,"If-Modified-Since")==0)
+                if(option_name && strcmp(option_name,"If-Modified-Since")==0)
                 {
                		option_val = strtok_r(NULL, "\n", &strtokr_save);
                	    http_method=METHOD_CONDITIONAL;
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
-               	    /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
-               	    if(!strptime(option_val, "%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+               	    if(strptime(option_val, " %a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato */
                	    {
+               	    	debug("strptime didn't end very well, you know...\n");
                	    	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
 						#ifdef INCaPACHE_2_3
 				      	1, connection_no, thread_idx,
 						#endif
-				      	NULL, NULL);/*
-				      	free(http_option_line);*/
+				      	NULL, NULL);
+				      	/*free(http_option_line);*/
 						break;
                		}
                	}
                 else
                 {
+                	debug("Couldn't parse option line correctly, you should pay attention you moron...\n");
                 	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
 					#ifdef INCaPACHE_2_3
 				    1, connection_no, thread_idx,
 					#endif
-				    NULL, NULL);/*
-				    free(http_option_line);*/
+				    NULL, NULL);
+				    /*free(http_option_line);*/
 					break;
 				}
 /*** TO BE DONE 2.2 END ***/
