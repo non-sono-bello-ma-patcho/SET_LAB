@@ -304,11 +304,11 @@ void manage_http_requests(int client_fd
 				option_name = strtok_r(http_option_line,": ", strtokr_save);
                 if(option_name && strcmp(http_option_line,"If-Modified-Since")==0)
                 {
-               		option_value = strtok_r(NULL, "\n", strtokr_save);
+               		option_val = strtok_r(NULL, "\n", strtokr_save);
                	    http_method=METHOD_CONDITIONAL;
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
                	    /*chiola più in su usava per la strftime "%a, %d %b %Y %T GMT"*/
-               	    if(!strptime(option_value, "%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
+               	    if(!strptime(option_val, "%a, %0d %b %y %0H:%0M:%0S", &since_tm))/*formato consigliato*/
                	    {
                	    	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
 						#ifdef INCaPACHE_2_3
@@ -369,7 +369,6 @@ void manage_http_requests(int client_fd
              /*time gm non considera più le var sotto  i secondi*/
              if(timegm(&since_tm)<(stat_p->st_mtime)) http_method=METHOD_GET;
              else http_method=METHOD_NOT_CHANGED;
-            
 /*** TO BE DONE 2.2 END ***/
 
 			}
