@@ -119,7 +119,7 @@ void join_prev_thread(int thrd_no)
     pthread_mutex_unlock( &threads_mutex );
 	for(i=MAX_CONNECTIONS; i<MAX_THREADS;i++)
 	{
-		if(connection_no[i]==conn_no)
+		if(connection_no[i]==conn_no&&i!=thrd_no)
 		{
 		    debug("joying thread i:%lu (%lu)...\n",i,thread_ids[i]);
             if(pthread_join(thread_ids[i] ,NULL)!=0)
@@ -131,8 +131,10 @@ void join_prev_thread(int thrd_no)
             (no_response_threads[conn_no])--;
             connection_no[i]=FREE_SLOT;
             pthread_mutex_unlock( &threads_mutex );
+            debug("unlocking...\n");
 		}
 	}
+	 debug("no threads found!...\n");
     
 /*** TO BE DONE 2.3 END ***/
 

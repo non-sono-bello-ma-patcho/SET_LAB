@@ -196,8 +196,6 @@ void send_response(int client_fd, int response_code,
 
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
-
-/*-> molto meglio ripetere l'operazione sovrascrivedno la merda che siè scritto precedente , riprovare fino a un tot di ttl oppure failare easy peasy*/
 	file_size=0;
 	while(file_size<stat_p->st_size) if(sendfile(client_fd,fd,&file_size,stat_p->st_size)<0) fail_errno("couldn't send data");
 /*** TO BE DONE 2.2 END ***/
