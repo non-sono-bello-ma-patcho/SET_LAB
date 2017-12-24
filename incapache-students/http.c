@@ -197,7 +197,13 @@ void send_response(int client_fd, int response_code,
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
 	file_size=0;
-	while(file_size<stat_p->st_size) if(sendfile(client_fd,fd,&file_size,stat_p->st_size)<0) fail_errno("couldn't send data");
+	int i=1;
+	while(file_size<stat_p->st_size) 
+	{
+	    fprintf(stderr,"tentativo numero:%d\n",i);
+	    if(sendfile(client_fd,fd,&file_size,stat_p->st_size)<0){ fail_errno("couldn't send data");}
+	}
+	if(close(fd)<0){fail_errno("Unable to close fd file\n");}
 /*** TO BE DONE 2.2 END ***/
 
 	}
