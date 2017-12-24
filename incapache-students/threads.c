@@ -78,8 +78,9 @@ void join_all_threads(int conn_no)
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
+    debug("start of join_all_thread(%d)\n", conn_no);
     pthread_mutex_lock(&threads_mutex);
-	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS&&no_response_thread[conn_no]>1;i--)
+	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS&&no_response_threads[conn_no]>1;i--)
 	{
 	    if(connection_no[i]==conn_no)
 	    {
@@ -91,8 +92,9 @@ void join_all_threads(int conn_no)
 			    no_response_threads[conn_no]--;
 			    connection_no[i]=FREE_SLOT;
 		    }
+		}
 	}
-	pthread_mutex_lock(&threads_mutex);
+	pthread_mutex_unlock(&threads_mutex);
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -110,18 +112,28 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/
-	conn_no = connection_no[thrd_no];
-	for(i=MAX_CONNECTIONS; i<MAX_THREADS;i++){
-		if(connection_no[i]==conn_no){
-			
+    debug("trying to acquire lock...\n");
+	pthread_mutex_lock( &threads_mutex );
+	debug("lock acquired...\n");
+    conn_no=connection_no[thrd_no];
+    pthread_mutex_unlock( &threads_mutex );
+	for(i=MAX_CONNECTIONS; i<MAX_THREADS;i++)
+	{
+		if(connection_no[i]==conn_no)
+		{
+		    debug("joying thread i:%lu (%lu)...\n",i,thread_ids[i]);
+            if(pthread_join(thread_ids[i] ,NULL)!=0)
+            {
+                fail_errno("ERROR thread join_prev");
+            }    
+            pthread_mutex_lock( &threads_mutex );   
+            no_free_threads++;
+            (no_response_threads[conn_no])--;
+            connection_no[i]=FREE_SLOT;
+            pthread_mutex_unlock( &threads_mutex );
 		}
 	}
-    if(!*to_join[thrd_no]) return; /* no prev thread*/
-    pthread_join( *(to_join[thrd_no]),NULL);		
-	pthread_mutex_lock( &threads_mutex );
-	no_free_threads++;
-	pthread_mutex_unlock( &threads_mutex );
-	(no_threads[thrd_no])--; 
+    
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -244,7 +256,8 @@ void send_resp_thread(int out_socket, int response_code,
 
 	/*** enqueue the current thread in the "to_join" data structure ***/
 /*** TO BE DONE 2.3 START ***/
-    to_join[new_thread_idx]=thread_ids[connection_idx];
+    to_join[new_thread_idx]=&thread_ids[connection_idx];
+    debug(" ... array to_join inizializzato\n");
 /*** TO BE DONE 2.3 END ***/
 
 	if (pthread_create(thread_ids + new_thread_idx, NULL, response_thread, connection_no + new_thread_idx))//    ,fa partire la routine puntata da response_thread 

@@ -20,6 +20,9 @@
 #define incApache_h
 
 #define DEBUG
+#define INCaPACHE_2_3
+
+
 
 #ifdef DEBUG
 #define debug(...) printf(__VA_ARGS__)
