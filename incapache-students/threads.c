@@ -268,5 +268,25 @@ void send_resp_thread(int out_socket, int response_code,
 	debug(" ... send_resp_thread(): new thread created\n");
 }
 
+#ifdef DEBUG
+void print_vars_stat(void)
+{
+size_t i;
+pthread_mutex_lock(&threads_mutex);
+printf("no_resp_t                 thread_ids          connection_no             to_join\n");
+    for(i=0;i<32;i++)
+    {
+        printf("i:%lu  %d                    ",i,no_response_threads[i]);
+        printf("%lu                    ",thread_ids[i]);
+        printf("%d                    ",connection_no[i]);
+        if(to_join[i]!=NULL){
+        printf("%lu \n",*to_join[i]);}else{printf("NULL \n");}
+
+
+    }
+ pthread_mutex_unlock( &threads_mutex );
+}
+#endif
+
 #endif
 
