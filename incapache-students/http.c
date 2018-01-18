@@ -300,11 +300,11 @@ void manage_http_requests(int client_fd
 /*** TO BE DONE 2.2 START ***/
               if(http_method== METHOD_NONE)
               {break;}
-				option_name=strtok_r(http_option_line," ", &strtokr_save);
+				option_name=strtok_r(http_option_line,":", &strtokr_save);
 				option_val=strtokr_save+1;
-                if(option_name && strcmp(option_name,"If-Modified-Since:")==0)
+                if(option_name && strcmp(option_name,"If-Modified-Since")==0)
                 {
-               	    
+               	  
                	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\r\n", &since_tm) == NULL)
                	    {
                	        if(strptime(option_val, "%A, %d-%b-%y %H:%M:%S GMT\n", &since_tm) == NULL)
@@ -312,7 +312,7 @@ void manage_http_requests(int client_fd
                	            if(strptime(option_val, "%a %b %e %H:%M:%S %Y\n", &since_tm) == NULL)
                	            {
                	                debug("\n\n\n\n\nriconoscimento linea opzionale fallito!\n\n\n\n\n\\");
-               	                break;
+               	                //break;
                	            }
                	        }
                	    }
