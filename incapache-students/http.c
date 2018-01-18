@@ -301,7 +301,7 @@ void manage_http_requests(int client_fd
 				option_name = strtok_r(http_option_line,":", &strtokr_save);
                 if(option_name && strcmp(option_name,"If-Modified-Since")==0)
                 {
-               		option_val = strtok_r(NULL, "\n", &strtokr_save);
+               		option_val = strtok_r(NULL, "\r\n", &strtokr_save);
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
                	    if(strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) != NULL || strptime(option_val, "%a, %d %b %Y %T GMT\r\n", &since_tm) != NULL || 
 					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) != NULL) break;
@@ -345,7 +345,10 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&since_tm)<(stat_p->st_mtime)) http_method= METHOD_GET;
+             if(timegm(&since_tm)<(stat_p->st_mtime)){
+             	puts("Since lmt is greater than request time, I'm setting method as get");
+             	http_method= METHOD_GET;
+             }
              else http_method=METHOD_NOT_CHANGED;
 /*** TO BE DONE 2.2 END ***/
 
