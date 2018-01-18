@@ -298,21 +298,22 @@ void manage_http_requests(int client_fd
 				 *** (and set since_tm by using strptime)
 				 ***/
 /*** TO BE DONE 2.2 START ***/
-				option_name = strtok_r(http_option_line,":", &strtokr_save);
-				option_val = strtokr_save + 1;
+              if(http_method== METHOD_NONE)
+              {break;}
+				option_name=strtok_r(http_option_line,":", &strtokr_save);
+				option_val=strtokr_save+1;
                 if(option_name && strcmp(option_name,"If-Modified-Since")==0)
                 {
-               	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
-               	    if(strptime(option_val, "%a, %d %b %Y %T GMT\r\n", &since_tm) == NULL &&
-					strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) == NULL &&
-					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) == NULL)
+               	    
+               	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\r\n", &since_tm) == NULL &&
+					strptime(option_val, "%A, %d-%b-%y %H:%M:%S GMT\n", &since_tm) == NULL &&
+					strptime(option_val, "%a %b %e %H:%M:%S %Y\n", &since_tm) == NULL)
 					{
-               	    	printf("\n\n\n\n\nPORCO DIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n\n\\");
-						break;
+               	    	debug("\n\n\n\n\neseguo or method_conditional\n\n\n\n\n\\");
+						http_method=http_method|METHOD_CONDITIONAL;
 					}
-					printf("\n\n\n\n\nPORCO DIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO___2\n\n\n\n\n\\");
-					http_method=METHOD_CONDITIONAL;
-               	}
+					else{debug("\n\n\n\n\nriconoscimento linea opzionale fallito!\n\n\n\n\n\\");break;}
+               	}             	
 /*** TO BE DONE 2.2 END ***/
 
 			}
