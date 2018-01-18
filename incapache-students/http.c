@@ -194,16 +194,12 @@ void send_response(int client_fd, int response_code,
 /*** TO BE DONE 2.2 START ***/
 
 /*LA SEND ALL?*/
-	/*file_size=0;
-	int i=1;
-	while(file_size<stat_p->st_size) 
-	{
-	    fprintf(stderr,"tentativo numero:%d\n",i);
-	    if(sendfile(client_fd,fd,&file_size,stat_p->st_size)<0){ fail_errno("couldn't send data");}
-	}
-	if(close(fd)<0){fail_errno("Unable to close fd file\n");}
-*/
-	for(size_t offset = 0;(offset+=send_all(client_fd, fd, &file_size, MSG_DONTWAIT))<file_size;);
+		size_t os;
+		ssize_t sb;
+		for (offset = 0; (os + (sb = sendfile(client_fd, fd, NULL, file_size))) < file_size; os += sb) {
+			if (sb < 0)
+				fail_errno("Couldn't send file");
+		}
 /*** TO BE DONE 2.2 END ***/
 
 	}
