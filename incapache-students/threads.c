@@ -68,7 +68,7 @@ int find_unused_thread_idx(int conn_no)
 	return idx;
 }
 
-/*dato che la join_all viene chiamata solo quando tutti i thread sono occupati implica che tuttr le celle di to_join sono inizializzate(almeno penso) quindi mi basta fare lo scan dell'array cercando un thread relativo alla conn_no*/
+
 void join_all_threads(int conn_no)
 {
 	size_t i;
@@ -112,30 +112,27 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/
-    debug("trying to acquire lock...\n");
-	pthread_mutex_lock( &threads_mutex );
-	debug("lock acquired...\n");
-    conn_no=connection_no[thrd_no];
-    pthread_mutex_unlock( &threads_mutex );
-	for(i=MAX_CONNECTIONS; i<MAX_THREADS;i++)
-	{
-		if(connection_no[i]==conn_no&&i!=thrd_no)
-		{
-		    debug("joying thread i:%lu (%lu)...\n",i,thread_ids[i]);
-            if(pthread_join(thread_ids[i] ,NULL)!=0)
-            {
+
+    if(to_join[thrd_no]!=NULL)
+    {
+        i=*to_join[thrd_no];
+        conn_no=connection_no[thrd_no];
+        if(to_join[i]!=NULL)
+        {
+        debug("joying thread i:%lu (%lu)...\n",i,thread_ids[i]);
+        if(pthread_join(thread_ids[i] ,NULL)!=0)
+        {
                 fail_errno("ERROR thread join_prev");
-            }    
-            pthread_mutex_lock( &threads_mutex );   
-            no_free_threads++;
-            (no_response_threads[conn_no])--;
-            connection_no[i]=FREE_SLOT;
-            pthread_mutex_unlock( &threads_mutex );
-            debug("unlocking...\n");
-		}
-	}
-	 debug("no threads found!...\n");
-    
+        } 
+        debug("FINISHED thread i:%lu ...\n",i);
+        pthread_mutex_lock( &threads_mutex );   
+        no_free_threads++;
+        no_response_threads[conn_no]--;
+        connection_no[i]=FREE_SLOT;
+        pthread_mutex_unlock( &threads_mutex );
+        }
+    }
+
 /*** TO BE DONE 2.3 END ***/
 
 }

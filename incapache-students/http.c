@@ -69,7 +69,7 @@ void send_response(int client_fd, int response_code,
 
 	/*** Compute date of servicing current HTTP Request using a variant of gmtime() ***/
 /*** TO BE DONE 2.2 START ***/
-    if(gmtime_r(&now_t, &now_tm)==NULL)fail_errno("Couldn't convert data");
+    if(!gmtime_r(&now_t, &now_tm))fail_errno("Couldn't convert data");
 /*** TO BE DONE 2.2 END ***/
 
 	strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &now_tm);
@@ -100,7 +100,6 @@ void send_response(int client_fd, int response_code,
 /*** TO BE DONE 2.2 START ***/
         file_size=stat_p->st_size;
         file_modification_time=stat_p->st_mtime;
-        if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
 /*** TO BE DONE 2.2 END ***/
 
 			debug("      ... send_response(%3d,%s) : file opened, size=%lu, mime=%s\n", response_code, filename, (unsigned long)file_size, mime_type);
@@ -121,12 +120,11 @@ void send_response(int client_fd, int response_code,
             if (stat_p == NULL) /*copiato da sopra ... cambiare mess errore*/
             {
 				stat_p = &stat_buffer;
-				if (stat(HTML_404, stat_p)){fail_errno("stat");}
+				if (stat(HTML_404, stat_p)){fail_errno("error:stat");}
 			}
-            mime_type = get_mime_type(HTML_404);
             file_size=stat_p->st_size;
             file_modification_time=stat_p->st_mtime;
-            if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
+            mime_type = get_mime_type(HTML_404);
 /*** TO BE DONE 2.2 END ***/
 
 		}
@@ -140,12 +138,11 @@ void send_response(int client_fd, int response_code,
             if (stat_p == NULL) /*copiato da sopra ... cambiare mess errore*/
             {
 				stat_p = &stat_buffer;
-				if (stat(HTML_501, stat_p)){fail_errno("stat");}
+				if (stat(HTML_501, stat_p)){fail_errno("error:stat");}
 			}
-            mime_type = get_mime_type(HTML_501);
             file_size=stat_p->st_size;
             file_modification_time=stat_p->st_mtime;
-            if(gmtime_r(&file_modification_time, &file_modification_tm)==NULL)fail_errno("gmtime");
+            mime_type = get_mime_type(HTML_501);
 /*** TO BE DONE 2.2 END ***/
 
 		}
@@ -164,8 +161,7 @@ void send_response(int client_fd, int response_code,
 		/*** compute time_as_string, corresponding to file_modification_time, in GMT standard format;
 		     see gmtime and strftime ***/
 /*** TO BE DONE 2.2 START ***/
-
-/*alla linea 78 non fa già questa operazione?-> Quello alla linea 78 è la data di richiesta non di modifica*/
+         if(!gmtime_r(&file_modification_time, &file_modification_tm)){fail_errno("error:gmtime_r");}
         strftime(time_as_string, MAX_TIME_STR, "%a, %d %b %Y %T GMT", &file_modification_tm);
 /*** TO BE DONE 2.2 END ***/
 
@@ -196,6 +192,8 @@ void send_response(int client_fd, int response_code,
 
 		/*** send fd file on client_fd, then close fd; see syscall sendfile  ***/
 /*** TO BE DONE 2.2 START ***/
+
+/*LA SEND ALL?*/
 	file_size=0;
 	int i=1;
 	while(file_size<stat_p->st_size) 
@@ -258,9 +256,6 @@ void manage_http_requests(int client_fd
 		 *** filename, and protocol ***/
 /*** TO BE DONE 2.2 START ***/
 		/* aggiungere gestione richieste COMPLETAMENTE ERRATE*/
-		method_str = NULL;
-		filename = NULL;
-		protocol = NULL;
 		method_str = strtok_r(http_request_line, " ", &strtokr_save);
         if(method_str){
         	filename = strtok_r(NULL, " ", &strtokr_save);
@@ -319,19 +314,17 @@ void manage_http_requests(int client_fd
 				      	1, connection_no, thread_idx,
 						#endif
 				      	NULL, NULL);
-				      	/*free(http_option_line);*/
 						break;
                		}
                	}
                 else
                 {
-                	debug("Couldn't parse option line correctly, you should pay attention you moron...\n");
+                	debug("Couldn't parse option line correctly...\n");
                 	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST	,
 					#ifdef INCaPACHE_2_3
 				    1, connection_no, thread_idx,
 					#endif
 				    NULL, NULL);
-				    /*free(http_option_line);*/
 					break;
 				}
 /*** TO BE DONE 2.2 END ***/
