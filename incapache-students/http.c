@@ -305,7 +305,7 @@ void manage_http_requests(int client_fd
                 if(option_name && strcmp(option_name,"If-Modified-Since")==0)
                 {
                	  
-               	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\r\n", &since_tm) == NULL)
+               	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\n", &since_tm) == NULL)
                	    {
                	        if(strptime(option_val, "%A, %d-%b-%y %H:%M:%S GMT\n", &since_tm) == NULL)
                	        {
