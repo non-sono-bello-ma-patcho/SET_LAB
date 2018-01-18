@@ -345,8 +345,8 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&since_tm)>(stat_p->st_mtime)) http_method= METHOD_GET;
-             else http_method=http_method & METHOD_NOT_CHANGED;
+             if(timegm(&since_tm)<(stat_p->st_mtime)) http_method= METHOD_GET;
+             else http_method=METHOD_NOT_CHANGED;
 /*** TO BE DONE 2.2 END ***/
 
 			}
