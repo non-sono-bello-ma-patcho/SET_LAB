@@ -310,7 +310,7 @@ void manage_http_requests(int client_fd
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
                	    if(strptime(option_val, " %a, %0d %b %y %0H:%0M:%0S", &since_tm) == NULL && strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) == NULL &&
 					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) == NULL)/*formato consigliato */
-
+               	}
 /*** TO BE DONE 2.2 END ***/
 
 			}
