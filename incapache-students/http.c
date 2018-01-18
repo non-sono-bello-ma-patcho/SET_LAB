@@ -196,7 +196,7 @@ void send_response(int client_fd, int response_code,
 /*LA SEND ALL?*/
 		size_t os;
 		ssize_t sb;
-		for (offset = 0; (os + (sb = sendfile(client_fd, fd, NULL, file_size))) < file_size; os += sb) {
+		for (os = 0; (os + (sb = sendfile(client_fd, fd, NULL, file_size))) < file_size; os += sb) {
 			if (sb < 0)
 				fail_errno("Couldn't send file");
 		}
