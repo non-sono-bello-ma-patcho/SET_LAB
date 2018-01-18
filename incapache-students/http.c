@@ -305,8 +305,8 @@ void manage_http_requests(int client_fd
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
                	    if(strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) != NULL || strptime(option_val, "%a, %d %b %Y %T GMT\r\n", &since_tm) != NULL || 
 					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) != NULL) break;
-					http_method=METHOD_CONDITIONAL;
                	}
+               	if (http_method != METHOD_NONE)	http_method = http_method | METHOD_CONDITIONAL;
 /*** TO BE DONE 2.2 END ***/
 
 			}
@@ -345,11 +345,8 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
-             if(timegm(&since_tm)<(stat_p->st_mtime)){
-             	puts("Since lmt is greater than request time, I'm setting method as get");
-             	http_method= METHOD_GET;
-             }
-             else http_method=METHOD_NOT_CHANGED;
+				if(stat_p->st_mtime <= timegm(&since_tm)) http_method = METHOD_NOT_CHANGED;
+				else (http_method & METHOD_NOT_CHANGED);
 /*** TO BE DONE 2.2 END ***/
 
 			}
