@@ -308,8 +308,15 @@ void manage_http_requests(int client_fd
                		option_val = strtok_r(NULL, "\n", &strtokr_save);
                	    http_method=METHOD_CONDITIONAL;
                	    /*switcho tra i vari formati compatibili? o uso solo quello consigliato?*/
-               	    if(strptime(option_val, " %a, %0d %b %y %0H:%0M:%0S", &since_tm) == NULL && strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) == NULL &&
-					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) == NULL)/*formato consigliato */
+               	    if(strptime(option_val, " %a, %0d %b %y %0H:%0M:%0S", &since_tm) != NULL || strptime(option_val, "%A, %d-%b-%y %T GMT\r\n", &since_tm) != NULL ||
+					strptime(option_val, "%a %b %e %T %Y\r\n", &since_tm) != NULL){
+               	    	SEND_RESPONSE(client_fd, RESPONSE_CODE_BAD_REQUEST,
+						#ifdef INCaPACHE_2_3
+				      	1, connection_no, thread_idx,
+						#endif
+				      	method_str, NULL);
+						break;
+					}/*formato consigliato */
                	}
 /*** TO BE DONE 2.2 END ***/
 
