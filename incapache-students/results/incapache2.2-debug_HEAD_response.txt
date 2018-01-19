@@ -1,0 +1,49 @@
+[92mTESTING HEAD METHOD[0m
+
+[94mSending Bad request [syntax error in method][0m
+HTTP/1.0 400 Bad Request
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+
+
+[94mSending Bad request [syntax error in method][0m
+HTTP/1.0 400 Bad Request
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+
+
+[94mSending Bad request [syntax error in method][0m
+HTTP/1.0 400 Bad Request
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+
+
+[94mSending Bad request [data format][0m
+HTTP/1.0 200 OK
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+Content-Length: 936 
+Content-Type: text/html; charset=us-ascii
+Last-Modified: Wed, 27 Dec 2017 13:00:43 GMT
+
+
+[94mSending Correct request [IMS 26/11/2014] [0m
+HTTP/1.0 200 OK
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+Content-Length: 936 
+Content-Type: text/html; charset=us-ascii
+Last-Modified: Wed, 27 Dec 2017 13:00:43 GMT
+
+
+[94mSending Correct request [IMS 20/01/2018][0m
+HTTP/1.0 304 Not Modified
+Date: Fri, 19 Jan 2018 18:24:08 GMT
+Server: incApache for SET.
+Connection: close
+
