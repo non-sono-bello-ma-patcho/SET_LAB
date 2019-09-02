@@ -49,7 +49,7 @@ int find_unused_thread_idx(int conn_no)
 {
 	int idx = -1;
 	pthread_mutex_lock(&threads_mutex);
-	if (no_response_threads[conn_no] > 0) { /* reserved thread already used, try to find another (unused) one */
+	if (no_response_threads[conn_no] > 0) { 
 		if (no_free_threads > 0) { /* se esistono slot liberi*/
 			--no_free_threads; /* decremento numero slot liberi*/
 			++no_response_threads[conn_no]; /* alla conessione corrente aggiungo un thread di risposta */
@@ -58,7 +58,7 @@ int find_unused_thread_idx(int conn_no)
 			return idx; /* restituisco l'id */
 		} /* senza slot liberi */
 		pthread_mutex_unlock(&threads_mutex);
-		join_all_threads(conn_no); /* eseguo tutti i thread relativi alla connessione (?) */
+		join_all_threads(conn_no);/*eseguo tutti i thread relativi alla connessione per trovare un nuovo posto */
 		pthread_mutex_lock(&threads_mutex);
 	}
 	assert(no_response_threads[conn_no] == 0);
@@ -68,24 +68,33 @@ int find_unused_thread_idx(int conn_no)
 	return idx;
 }
 
+
 void join_all_threads(int conn_no)
 {
 	size_t i;
 
-	/*** compute the index i of the thread to join,l
+	/*** compute the index i of the thread to join,
 	 *** call pthread_join() on thread_ids[i], and update shared variables
 	 *** no_free_threads, no_response_threads[conn_no], and
 	 *** connection_no[i] ***/
 /*** TO BE DONE 2.3 START ***/
-	i=MAX_CONNECTIONS+conn_no;
-	for(i=0;i<no_response_threads[conn_no];i++){
-		if(pthread_join(thread_ids[(i*MAX_CONNECTIONS)+conn_no], NULL)<0) fail_errno("couldn't join");
-		else{
-			++no_free_threads; /*latest joined thread as expired?...*/
-			--no_response_threads[conn_no];
-			connection_no[conn_no]=FREE_SLOT; /*if thread has expired he no longer has connections(?)*/
+    debug("start of join_all_thread(%d)\n", conn_no);
+    pthread_mutex_lock(&threads_mutex);
+	for(i=MAX_THREADS-1;i>=MAX_CONNECTIONS&&no_response_threads[conn_no]>1;i--)
+	{
+	    if(connection_no[i]==conn_no)
+	    {
+		    if(pthread_join(thread_ids[i], NULL)!=0)
+		    {fail_errno("ERROR thread join_all");}
+		    else
+		    {
+			    no_free_threads++; /*latest joined thread as expired?...*/
+			    no_response_threads[conn_no]--;
+			    connection_no[i]=FREE_SLOT;
+		    }
 		}
 	}
+	pthread_mutex_unlock(&threads_mutex);
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -103,9 +112,27 @@ void join_prev_thread(int thrd_no)
 	 *** no_free_threads, no_response_threads[conn_no], and connection_no[i],
 	 *** avoiding race conditions ***/
 /*** TO BE DONE 2.3 START ***/
-	pthread_mutex_lock(&threads_mutex);
-	if(to_join[thrd_no])
-	pthread_mutex_unlock(&threads_mutex);
+
+    if(to_join[thrd_no]!=NULL)
+    {
+        i=*to_join[thrd_no];
+        conn_no=connection_no[thrd_no];
+        if(to_join[i]!=NULL)
+        {
+        debug("joying thread i:%lu (%lu)...\n",i,thread_ids[i]);
+        if(pthread_join(thread_ids[i] ,NULL)!=0)
+        {
+                fail_errno("ERROR thread join_prev");
+        } 
+        debug("FINISHED thread i:%lu ...\n",i);
+        pthread_mutex_lock( &threads_mutex );   
+        no_free_threads++;
+        no_response_threads[conn_no]--;
+        connection_no[i]=FREE_SLOT;
+        pthread_mutex_unlock( &threads_mutex );
+        }
+    }
+
 /*** TO BE DONE 2.3 END ***/
 
 }
@@ -144,11 +171,11 @@ void *client_connection_thread(void *vp)
 	socklen_t addr_size;
 #ifdef INCaPACHE_2_3
 	pthread_mutex_lock(&threads_mutex);
-	int connection_no = *((int *) vp);
+	int connection_no = *((int *) vp);/*era ovvio che vp non potesse essere NULL dio bono*/
 
 	/*** properly initialize the thread queue to_join ***/
 /*** TO BE DONE 2.3 START ***/
-	
+    to_join[connection_no]=NULL;/*sono i thread base*/
 /*** TO BE DONE 2.3 END ***/
 
 	pthread_mutex_unlock(&threads_mutex);
@@ -213,7 +240,7 @@ char *get_mime_type(char *filename)
 #ifdef INCaPACHE_2_3
 
 void send_resp_thread(int out_socket, int response_code,
-		      int is_http1_0, int connection_idx, int new_thread_idx,
+		      int is_http1_0, int connection_idx, int new_thread_idx,/*questa variabile viene trovata in http.c grazie a find_unused_thread */
 		      char *filename, struct stat *stat_p)
 {
 	struct response_params *params =  thread_params + (new_thread_idx - MAX_CONNECTIONS);
@@ -228,14 +255,35 @@ void send_resp_thread(int out_socket, int response_code,
 
 	/*** enqueue the current thread in the "to_join" data structure ***/
 /*** TO BE DONE 2.3 START ***/
-
-
+    to_join[new_thread_idx]=&thread_ids[connection_idx];
+    debug(" ... array to_join inizializzato\n");
 /*** TO BE DONE 2.3 END ***/
 
-	if (pthread_create(thread_ids + new_thread_idx, NULL, response_thread, connection_no + new_thread_idx))
+	if (pthread_create(thread_ids + new_thread_idx, NULL, response_thread, connection_no + new_thread_idx))//    ,fa partire la routine puntata da response_thread 
 		fail_errno("Could not create response thread");
 	pthread_mutex_unlock(&threads_mutex);
 	debug(" ... send_resp_thread(): new thread created\n");
 }
 
+#ifdef DEBUG
+void print_vars_stat(void)
+{
+size_t i;
+pthread_mutex_lock(&threads_mutex);
+printf("no_resp_t                 thread_ids          connection_no             to_join\n");
+    for(i=0;i<32;i++)
+    {
+        printf("i:%lu  %d                    ",i,no_response_threads[i]);
+        printf("%lu                    ",thread_ids[i]);
+        printf("%d                    ",connection_no[i]);
+        if(to_join[i]!=NULL){
+        printf("%lu \n",*to_join[i]);}else{printf("NULL \n");}
+
+
+    }
+ pthread_mutex_unlock( &threads_mutex );
+}
 #endif
+
+#endif
+

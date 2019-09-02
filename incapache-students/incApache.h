@@ -20,6 +20,9 @@
 #define incApache_h
 
 #define DEBUG
+/*#define INCaPACHE_2_3*/
+
+
 
 #ifdef DEBUG
 #define debug(...) printf(__VA_ARGS__)
@@ -81,7 +84,7 @@ extern void join_prev_thread(int thrd_no);
 extern void send_resp_thread(int out_socket, int response_code,
 			     int is_http1_0, int connection_idx, int new_thread_idx,
 			     char *filename, struct stat *stat_p);
-
+void print_vars_stat(void);
 #else /* #ifdef INCaPACHE_2_3 */
 
 #define SEND_RESPONSE send_response

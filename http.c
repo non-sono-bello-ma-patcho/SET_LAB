@@ -300,21 +300,23 @@ void manage_http_requests(int client_fd
 /*** TO BE DONE 2.2 START ***/
               if(http_method== METHOD_NONE)
               {break;}
-				option_name=strtok_r(http_option_line,":", &strtokr_save);
+				option_name=strtok_r(http_option_line," ", &strtokr_save);
 				option_val=strtokr_save+1;
-                if(option_name && strcmp(option_name,"If-Modified-Since")==0)
+                if(option_name && strcmp(option_name,"If-Modified-Since:")==0)
                 {
-               	  
-               	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\n", &since_tm) == NULL)
+               	    
+               	    if(strptime(option_val, "%a, %d %b %Y %H:%M:%S GMT\r\n", &since_tm) == NULL)
                	    {
                	        if(strptime(option_val, "%A, %d-%b-%y %H:%M:%S GMT\n", &since_tm) == NULL)
                	        {
                	            if(strptime(option_val, "%a %b %e %H:%M:%S %Y\n", &since_tm) == NULL)
                	            {
+               	                debug("\n\n\n\n\nriconoscimento linea opzionale fallito!\n\n\n\n\n\\");
                	                break;
                	            }
                	        }
                	    }
+					debug("\n\n\n\n\neseguo or method_conditional\n\n\n\n\n\\");
 				    http_method=http_method|METHOD_CONDITIONAL;
                	}             	
 /*** TO BE DONE 2.2 END ***/
@@ -355,6 +357,7 @@ void manage_http_requests(int client_fd
 				 ***/
 /*** TO BE DONE 2.2 START ***/
              /*time gm non considera più le var sotto  i secondi*/
+             debug("\n\n\n\n\ncontrollo i tempi....\ngiorno:%d data:%d  mese:%d anno:%d ore%d min%d sec%d\n\n\n\n",since_tm.tm_wday,since_tm.tm_mday,since_tm.tm_mon,since_tm.tm_year,since_tm.tm_hour,since_tm.tm_min,since_tm.tm_sec);
              if(timegm(&since_tm)<(stat_p->st_mtime)){http_method=http_method&METHOD_NOT_CHANGED;}
              else {http_method=METHOD_NOT_CHANGED;}
 /*** TO BE DONE 2.2 END ***/
